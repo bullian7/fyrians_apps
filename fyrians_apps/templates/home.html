@@ -4,26 +4,54 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
 {% endblock %}
 
-{% block content %}
-<div class="home-container">
-    <header class="home-header">
-        <h1>Welcome to Fyrian's Apps</h1>
-        <p class="subtitle">Select a tool to get started</p>
-    </header>
+{% block main_class %}home-main{% endblock %}
 
-    <div class="app-grid">
-        <a href="/schedule" class="app-card">
-            <h2>Schedule Optimizer</h2>
-            <p>Branch-and-bound assignment engine to optimally assign students to available time slots based on preferences.</p>
-        </a>
-        <a href="/typing" class="app-card">
-            <h2>Fyrian Types</h2>
-            <p>A minimalist, customizable typing test designed for speed, accuracy, and performance tracking.</p>
-        </a>
-        <a href="/spotify" class="app-card">
-            <h2>Spotify Statistics</h2>
-            <p>Your top 50 tracks, artists, and genre breakdown across 4-week, 6-month, and all-time ranges. Plus recently played history.</p>
-        </a>
-    </div>
+{% block content %}
+<div class="home-shell">
+    <aside class="app-sidebar" aria-label="Applets">
+        <div class="sidebar-head">
+            <div class="sidebar-head-top">
+                <h1>Fyrian's Apps</h1>
+                <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-expanded="true" aria-label="Collapse sidebar">⇤</button>
+            </div>
+        </div>
+
+        <button class="sidebar-app active" data-app-key="schedule" data-app-url="/schedule?embed=1">
+            <span class="app-line"></span>
+            <span class="app-name">Abbi's Class Scheduler</span>
+        </button>
+
+        <button class="sidebar-app" data-app-key="typing" data-app-url="/typing?embed=1">
+            <span class="app-line"></span>
+            <span class="app-name">Typing Test</span>
+        </button>
+
+        <button class="sidebar-app" data-app-key="spotify" data-app-url="/spotify?embed=1">
+            <span class="app-line"></span>
+            <span class="app-name">Spotify Statistics</span>
+        </button>
+
+        <button class="sidebar-app" data-app-key="sudoku" data-app-url="/sudoku?embed=1">
+            <span class="app-line"></span>
+            <span class="app-name">Sudoku Lab</span>
+        </button>
+    </aside>
+    <div id="sidebar-resizer" class="sidebar-resizer" role="separator" aria-label="Resize sidebar" aria-orientation="vertical" aria-valuemin="220" aria-valuemax="900"></div>
+
+    <section class="applet-panel">
+        <div class="applet-header">
+            <h2 id="applet-title">Abbi's Class Scheduler</h2>
+            <p id="applet-description">Branch-and-bound assignment engine for optimal student-to-slot scheduling.</p>
+            <a id="open-standalone" class="standalone-link" href="/schedule" target="_blank" rel="noopener noreferrer">Open Standalone</a>
+        </div>
+
+        <div class="applet-frame-wrap">
+            <iframe id="applet-frame" class="applet-frame" src="/schedule?embed=1" title="Selected applet"></iframe>
+        </div>
+    </section>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/home.js') }}"></script>
 {% endblock %}

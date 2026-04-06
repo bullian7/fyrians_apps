@@ -13,8 +13,13 @@
     <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
 </head>
 <body>
+    {% set embedded = request.args.get('embed') == '1' %}
+    {% if not embedded %}
     <nav class="top-nav">
-        <a href="/" class="nav-logo">Fyrian's Apps</a>
+        <div class="nav-brand">
+            <a href="/" class="nav-logo">Fyrian's Apps</a>
+            <p class="nav-description">The one-stop-shop for all of Fyrian's personal applets.</p>
+        </div>
         <div class="nav-controls">
             {% block nav_back %}{% endblock %}
             <select id="theme-selector" class="theme-selector">
@@ -24,8 +29,9 @@
             </select>
         </div>
     </nav>
+    {% endif %}
 
-    <main class="main-content">
+    <main class="main-content {% if embedded %}embedded{% endif %} {% block main_class %}{% endblock %}">
         {% block content %}{% endblock %}
     </main>
 

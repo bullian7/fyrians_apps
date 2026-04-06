@@ -121,6 +121,10 @@ def schedule():
 def typing():
     return render_template('typing.html')
 
+@app.route('/sudoku')
+def sudoku():
+    return render_template('sudoku.html')
+
 
 # ═══════════════════════════════════════════════════════════════════════
 #  SPOTIFY ROUTES

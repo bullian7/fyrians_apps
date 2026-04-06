@@ -1,49 +1,272 @@
-.home-container {
-    width: 800px;
-    max-width: 100%;
-    margin-top: 2rem;
+.main-content.home-main {
+    padding: 0;
+    justify-content: stretch;
+    align-items: stretch;
 }
 
-.home-header {
-    text-align: center;
-    margin-bottom: 4rem;
-}
-
-.home-header h1 {
-    color: var(--primary);
-    font-size: 3rem;
-    margin-bottom: 0.5rem;
-}
-
-.app-grid {
+.home-shell {
+    --sidebar-width: clamp(280px, 28vw, 620px);
+    --sidebar-collapsed: 92px;
+    width: 100%;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    grid-template-columns: var(--sidebar-width) 10px 1fr;
+    min-height: calc(100vh - 66px);
+    transition: grid-template-columns 0.2s ease;
 }
 
-.app-card {
-    background: var(--surface2);
+.home-shell.sidebar-collapsed {
+    grid-template-columns: var(--sidebar-collapsed) 0 1fr;
+}
+
+.home-shell.is-resizing {
+    transition: none;
+}
+
+.app-sidebar {
+    background: linear-gradient(180deg, var(--surface2), var(--surface));
+    border-right: 1px solid var(--border-subtle);
+    padding: 1.25rem 1rem 1.25rem 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.sidebar-resizer {
+    width: 10px;
+    cursor: col-resize;
+    background: linear-gradient(180deg, transparent, rgba(115, 185, 235, 0.32), transparent);
+    transition: background-color 0.2s ease;
+}
+
+.sidebar-resizer:hover,
+.sidebar-resizer.dragging {
+    background: rgba(115, 185, 235, 0.35);
+}
+
+.home-shell.is-resizing .applet-frame {
+    pointer-events: none;
+}
+
+.sidebar-head {
+    margin-bottom: 0.7rem;
+    padding: 0.2rem 0 0.8rem;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.sidebar-head-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.sidebar-head h1 {
+    color: var(--primary);
+    font-weight: bold;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+    margin-bottom: 0;
+}
+
+.sidebar-head p {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+}
+
+.sidebar-toggle {
     border: 1px solid var(--border-subtle);
-    border-radius: 10px;
-    padding: 2rem;
+    background: var(--surface);
+    color: var(--text-active);
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.home-shell.sidebar-collapsed .sidebar-toggle {
+    transform: rotate(180deg);
+}
+
+.sidebar-app {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    width: 100%;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.72rem 0.55rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.app-line {
+    width: 28px;
+    height: 1px;
+    background: var(--text-dim);
+    flex-shrink: 0;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.sidebar-app:hover {
+    background: rgba(115, 185, 235, 0.08);
+    color: var(--text-active);
+}
+
+.sidebar-app:hover .app-line {
+    background: var(--primary);
+    transform: scaleX(1.35);
+}
+
+.sidebar-app.active {
+    color: var(--text-active);
+    background: rgba(115, 185, 235, 0.14);
+}
+
+.sidebar-app.active .app-line {
+    background: var(--primary);
+    transform: scaleX(1.55);
+}
+
+.home-shell.sidebar-collapsed .sidebar-head h1,
+.home-shell.sidebar-collapsed .sidebar-subtitle,
+.home-shell.sidebar-collapsed .app-name {
+    display: none;
+}
+
+.home-shell.sidebar-collapsed .sidebar-head {
+    border-bottom: none;
+    padding-bottom: 0.2rem;
+}
+
+.home-shell.sidebar-collapsed .sidebar-app {
+    justify-content: center;
+    padding: 0.72rem 0.25rem;
+}
+
+.home-shell.sidebar-collapsed .app-line {
+    width: 34px;
+}
+
+.home-shell.sidebar-collapsed .sidebar-resizer {
+    width: 0;
+    pointer-events: none;
+}
+
+.applet-panel {
+    background: var(--surface2);
+    padding: 1rem 1rem 0;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.applet-header {
+    padding: 0.35rem 0.25rem 0.8rem;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 0.85rem;
+}
+
+.applet-header h2 {
+    color: var(--text-active);
+    font-size: 1.35rem;
+    margin-bottom: 0.3rem;
+}
+
+.applet-header p {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin-bottom: 0.55rem;
+}
+
+.standalone-link {
+    color: var(--primary);
     text-decoration: none;
-    transition: transform 0.2s, border-color 0.2s;
+    font-size: 0.84rem;
+}
+
+.standalone-link:hover {
+    text-decoration: underline;
+}
+
+.applet-frame-wrap {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    border-top: 1px solid var(--border-subtle);
+    background: var(--bg);
+}
+
+.applet-frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
     display: block;
 }
 
-.app-card:hover {
-    transform: translateY(-5px);
-    border-color: var(--primary);
+@media (max-width: 1100px) {
+    .home-shell {
+        grid-template-columns: 1fr;
+        min-height: auto;
+    }
+
+    .home-shell.sidebar-collapsed {
+        grid-template-columns: 1fr;
+    }
+
+    .app-sidebar {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .sidebar-head {
+        width: 100%;
+        border-bottom: none;
+        padding-bottom: 0.2rem;
+        margin-bottom: 0.3rem;
+    }
+
+    .sidebar-app {
+        width: calc(50% - 0.2rem);
+        border: 1px solid var(--border-subtle);
+    }
+
+    .applet-frame-wrap {
+        min-height: 72vh;
+    }
+
+    .home-shell.sidebar-collapsed .sidebar-head h1,
+    .home-shell.sidebar-collapsed .sidebar-subtitle,
+    .home-shell.sidebar-collapsed .app-name {
+        display: initial;
+    }
+
+    .home-shell.sidebar-collapsed .sidebar-app {
+        justify-content: flex-start;
+        padding: 0.72rem 0.55rem;
+    }
+
+    .home-shell.sidebar-collapsed .app-line {
+        width: 28px;
+    }
+
+    .sidebar-toggle {
+        display: none;
+    }
+
+    .sidebar-resizer {
+        display: none;
+    }
 }
 
-.app-card h2 {
-    color: var(--text-active);
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-}
-
-.app-card p {
-    color: var(--text-dim);
-    line-height: 1.5;
-    font-size: 0.95rem;
+@media (max-width: 680px) {
+    .sidebar-app {
+        width: 100%;
+    }
 }

@@ -1,0 +1,208 @@
+.sudoku-layout {
+    width: min(980px, 100%);
+}
+
+.sudoku-header {
+    margin-bottom: 1.5rem;
+}
+
+.sudoku-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.difficulty-group {
+    display: flex;
+    background: var(--surface2);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.diff-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    padding: 0.6rem 0.9rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.diff-btn + .diff-btn {
+    border-left: 1px solid var(--border-subtle);
+}
+
+.diff-btn.active {
+    background: rgba(115, 185, 235, 0.2);
+    color: var(--text-active);
+}
+
+.tool-btn {
+    border: 1px solid var(--border-subtle);
+    background: var(--surface2);
+    color: var(--text-active);
+    padding: 0.62rem 0.95rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.tool-btn.active {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.sudoku-main {
+    display: grid;
+    grid-template-columns: auto 240px;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.sudoku-board {
+    width: min(620px, 100%);
+    aspect-ratio: 1 / 1;
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    grid-template-rows: repeat(9, 1fr);
+    background: var(--surface2);
+    border: 2px solid var(--text-active);
+}
+
+.cell {
+    border: 1px solid var(--border-subtle);
+    background: var(--surface);
+    color: var(--text-active);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: clamp(1rem, 2vw, 1.8rem);
+    position: relative;
+    user-select: none;
+}
+
+.cell:nth-child(3n) {
+    border-right: 2px solid var(--text-active);
+}
+
+.cell:nth-child(9n) {
+    border-right: 0;
+}
+
+.cell.group-bottom {
+    border-bottom: 2px solid var(--text-active);
+}
+
+.cell.given {
+    background: rgba(16, 19, 23, 0.45);
+    font-weight: 700;
+    cursor: default;
+}
+
+.cell.selected {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+    z-index: 2;
+}
+
+.cell.peer {
+    background: rgba(115, 185, 235, 0.08);
+}
+
+.cell.same-value {
+    background: rgba(235, 177, 115, 0.28);
+    box-shadow: inset 0 0 0 1px var(--warn);
+}
+
+.cell.conflict {
+    color: var(--error);
+}
+
+.notes-grid {
+    position: absolute;
+    inset: 10%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 1px;
+    font-size: 0.58rem;
+    color: var(--text-mid);
+    line-height: 1;
+}
+
+.note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.note.match {
+    color: var(--warn);
+    font-weight: 700;
+}
+
+.keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.45rem;
+}
+
+.key-btn {
+    border: 1px solid var(--border-subtle);
+    background: var(--surface2);
+    color: var(--text-active);
+    border-radius: 8px;
+    padding: 0.7rem 0;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.key-btn:hover,
+.tool-btn:hover {
+    border-color: var(--primary);
+}
+
+.key-btn.done {
+    opacity: 0.38;
+    color: var(--text-dim);
+    border-color: var(--border-subtle);
+}
+
+.key-btn.erase {
+    grid-column: span 3;
+}
+
+.status-box {
+    margin-top: 0.8rem;
+    border: 1px solid var(--border-subtle);
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 0.75rem;
+    color: var(--text-dim);
+    line-height: 1.4;
+    font-size: 0.9rem;
+}
+
+#status-text {
+    color: var(--text-active);
+    margin-bottom: 0.2rem;
+}
+
+.help-text {
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 900px) {
+    .sudoku-main {
+        grid-template-columns: 1fr;
+    }
+
+    .sudoku-board {
+        width: 100%;
+    }
+}

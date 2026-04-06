@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sudoku.css') }}">
+{% endblock %}
+
+{% block nav_back %}
+<a href="/" class="back-link">← Back to Apps</a>
+{% endblock %}
+
+{% block content %}
+<div class="sudoku-layout">
+    <header class="app-header sudoku-header">
+        <h1>Sudoku Lab</h1>
+        <p class="subtitle">generator with pencil marks</p>
+    </header>
+
+    <div class="sudoku-toolbar">
+        <div class="difficulty-group" role="group" aria-label="Difficulty">
+            <button class="diff-btn active" data-difficulty="easy">Easy</button>
+            <button class="diff-btn" data-difficulty="medium">Medium</button>
+            <button class="diff-btn" data-difficulty="hard">Hard</button>
+        </div>
+
+        <button id="new-game-btn" class="primary-btn">New Puzzle</button>
+        <button id="notes-toggle" class="tool-btn" aria-pressed="false">Notes: Off</button>
+        <button id="clear-board-btn" class="tool-btn">Clear Entries</button>
+    </div>
+
+    <div class="sudoku-main">
+        <div id="sudoku-board" class="sudoku-board" aria-label="Sudoku board"></div>
+
+        <div class="sudoku-side">
+            <div class="keypad" aria-label="Number keypad">
+                <button class="key-btn" data-value="1">1</button>
+                <button class="key-btn" data-value="2">2</button>
+                <button class="key-btn" data-value="3">3</button>
+                <button class="key-btn" data-value="4">4</button>
+                <button class="key-btn" data-value="5">5</button>
+                <button class="key-btn" data-value="6">6</button>
+                <button class="key-btn" data-value="7">7</button>
+                <button class="key-btn" data-value="8">8</button>
+                <button class="key-btn" data-value="9">9</button>
+                <button class="key-btn erase" data-value="0">Erase</button>
+            </div>
+
+            <div class="status-box">
+                <div id="status-text">Puzzle ready</div>
+                <div id="mistake-text">Conflicts: 0</div>
+                <p class="help-text">Tip: press <strong>N</strong> to toggle notes mode.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sudoku.js') }}"></script>
+{% endblock %}
