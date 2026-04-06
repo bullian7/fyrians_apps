@@ -20,6 +20,9 @@ const statusTextEl = document.getElementById('status-text');
 const mistakeTextEl = document.getElementById('mistake-text');
 const notesToggleEl = document.getElementById('notes-toggle');
 const newGameBtnEl = document.getElementById('new-game-btn');
+const sudokuWorker = typeof Worker !== 'undefined' ? new Worker('/static/js/sudoku-worker.js') : null;
+const pendingWorkerJobs = new Map();
+let workerJobId = 0;
 
 const deepCopy = (board) => board.map((row) => [...row]);
 
@@ -122,6 +125,34 @@ function generatePuzzle(cluesTarget) {
     }
 
     return { puzzle, solution: full };
+}
+
+function requestPuzzle(cluesTarget) {
+    if (!sudokuWorker) {
+        return Promise.resolve(generatePuzzle(cluesTarget));
+    }
+
+    return new Promise((resolve, reject) => {
+        const id = ++workerJobId;
+        pendingWorkerJobs.set(id, { resolve, reject });
+        sudokuWorker.postMessage({ id, cluesTarget });
+    });
+}
+
+if (sudokuWorker) {
+    sudokuWorker.addEventListener('message', (event) => {
+        const { id, puzzle, solution, error } = event.data || {};
+        const job = pendingWorkerJobs.get(id);
+        if (!job) return;
+        pendingWorkerJobs.delete(id);
+
+        if (error) {
+            job.reject(new Error(error));
+            return;
+        }
+
+        job.resolve({ puzzle, solution });
+    });
 }
 
 function coordsFromIndex(index) {
@@ -322,15 +353,15 @@ function clearEntries() {
     renderBoard();
 }
 
-function newGame() {
+async function newGame() {
     statusTextEl.textContent = 'Generating puzzle...';
     if (newGameBtnEl) {
         newGameBtnEl.textContent = 'New Puzzle';
     }
 
-    setTimeout(() => {
+    try {
         const clues = DIFFICULTY_CLUES[currentDifficulty];
-        const generated = generatePuzzle(clues);
+        const generated = await requestPuzzle(clues);
         puzzleBoard = generated.puzzle;
         solutionBoard = generated.solution;
         userBoard = deepCopy(puzzleBoard);
@@ -339,7 +370,9 @@ function newGame() {
 
         statusTextEl.textContent = `${currentDifficulty[0].toUpperCase()}${currentDifficulty.slice(1)} puzzle ready`;
         renderBoard();
-    }, 15);
+    } catch (err) {
+        statusTextEl.textContent = `Generation failed: ${err.message}`;
+    }
 }
 
 function handleKeydown(event) {

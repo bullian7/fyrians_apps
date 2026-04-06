@@ -31,16 +31,34 @@
     gap: 0.55rem;
 }
 
+.app-sigil {
+    font-size: 0.8rem;
+    color: var(--text-mid);
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    min-width: 30px;
+}
+
 .sidebar-resizer {
+    position: relative;
     width: 10px;
     cursor: col-resize;
     background: linear-gradient(180deg, transparent, rgba(115, 185, 235, 0.32), transparent);
-    transition: background-color 0.2s ease;
 }
 
-.sidebar-resizer:hover,
-.sidebar-resizer.dragging {
+.sidebar-resizer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
     background: rgba(115, 185, 235, 0.35);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.sidebar-resizer:hover::after,
+.sidebar-resizer.dragging::after {
+    opacity: 1;
 }
 
 .home-shell.is-resizing .applet-frame {
@@ -132,8 +150,11 @@
     transform: scaleX(1.55);
 }
 
+.sidebar-app.active .app-sigil {
+    color: var(--primary);
+}
+
 .home-shell.sidebar-collapsed .sidebar-head h1,
-.home-shell.sidebar-collapsed .sidebar-subtitle,
 .home-shell.sidebar-collapsed .app-name {
     display: none;
 }
@@ -149,7 +170,13 @@
 }
 
 .home-shell.sidebar-collapsed .app-line {
-    width: 34px;
+    display: none;
+}
+
+.home-shell.sidebar-collapsed .app-sigil {
+    min-width: auto;
+    font-size: 0.85rem;
+    color: var(--text-active);
 }
 
 .home-shell.sidebar-collapsed .sidebar-resizer {
@@ -189,6 +216,10 @@
     font-size: 0.84rem;
 }
 
+.standalone-link.hidden-link {
+    display: none;
+}
+
 .standalone-link:hover {
     text-decoration: underline;
 }
@@ -199,13 +230,79 @@
     overflow: hidden;
     border-top: 1px solid var(--border-subtle);
     background: var(--bg);
+    position: relative;
+}
+
+.applet-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 5;
+}
+
+.applet-loading.active {
+    opacity: 1;
+    width: 100%;
+    animation: frame-load 1s linear infinite;
+}
+
+.applet-frame-stack {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.welcome-panel {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 0.8rem;
+    padding: 2rem;
+    background:
+        radial-gradient(circle at 18% 16%, rgba(255, 255, 255, 0.12), transparent 52%),
+        radial-gradient(circle at 82% 70%, rgba(255, 255, 255, 0.08), transparent 55%),
+        linear-gradient(145deg, #2b7bb5, #73b9eb);
+}
+
+.welcome-panel h3 {
+    color: #f4f8fb;
+    font-size: 2.1rem;
+    line-height: 1.2;
+}
+
+.welcome-panel p {
+    max-width: 640px;
+    color: rgba(244, 248, 251, 0.95);
+    font-size: 1.18rem;
+    line-height: 1.65;
 }
 
 .applet-frame {
     width: 100%;
     height: 100%;
     border: 0;
+    display: none;
+    position: absolute;
+    inset: 0;
+}
+
+.applet-frame.active {
     display: block;
+}
+
+@keyframes frame-load {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
 }
 
 @media (max-width: 1100px) {
@@ -242,7 +339,6 @@
     }
 
     .home-shell.sidebar-collapsed .sidebar-head h1,
-    .home-shell.sidebar-collapsed .sidebar-subtitle,
     .home-shell.sidebar-collapsed .app-name {
         display: initial;
     }
@@ -253,7 +349,13 @@
     }
 
     .home-shell.sidebar-collapsed .app-line {
+        display: inline-block;
         width: 28px;
+    }
+
+    .home-shell.sidebar-collapsed .app-sigil {
+        min-width: 30px;
+        color: var(--text-mid);
     }
 
     .sidebar-toggle {

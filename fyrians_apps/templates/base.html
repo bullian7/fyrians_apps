@@ -22,6 +22,10 @@
         </div>
         <div class="nav-controls">
             {% block nav_back %}{% endblock %}
+            <label class="cursor-toggle" for="cursor-follower-toggle">
+                <input type="checkbox" id="cursor-follower-toggle" checked>
+                <span>Cursor Follower</span>
+            </label>
             <select id="theme-selector" class="theme-selector">
                 <option value="system">System</option>
                 <option value="dark">Dark</option>
@@ -34,7 +38,13 @@
     <main class="main-content {% if embedded %}embedded{% endif %} {% block main_class %}{% endblock %}">
         {% block content %}{% endblock %}
     </main>
+    {% if not embedded %}
+    <footer class="site-footer">
+        Fyrian's Apps · personal applet collection
+    </footer>
+    {% endif %}
 
+    <script src="{{ url_for('static', filename='js/cursor-slash.js') }}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

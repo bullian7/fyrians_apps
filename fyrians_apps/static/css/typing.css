@@ -18,7 +18,8 @@
 .settings-group { display: flex; align-items: center; gap: 15px; }
 .settings-group .label { color: var(--text-dim); }
 
-.controls button {
+.controls .toggle-btn,
+.controls .time-btn {
     background: none;
     border: none;
     color: var(--text-dim);
@@ -27,7 +28,13 @@
     transition: 0.2s;
     outline: none;
 }
-.controls button:hover, .controls button.active { color: var(--primary); }
+
+.controls .toggle-btn:hover,
+.controls .toggle-btn.active,
+.controls .time-btn:hover,
+.controls .time-btn.active {
+    color: var(--primary);
+}
 
 #timer { font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem; }
 

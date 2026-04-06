@@ -16,40 +16,39 @@
             </div>
         </div>
 
-        <button class="sidebar-app active" data-app-key="schedule" data-app-url="/schedule?embed=1">
+        {% for app in applets %}
+        <button
+            class="sidebar-app"
+            data-app-key="{{ app.key }}"
+            data-app-url="{{ app.embed }}"
+        >
+            <span class="app-sigil">{{ app.sigil }}</span>
             <span class="app-line"></span>
-            <span class="app-name">Abbi's Class Scheduler</span>
+            <span class="app-name">{{ app.name }}</span>
         </button>
-
-        <button class="sidebar-app" data-app-key="typing" data-app-url="/typing?embed=1">
-            <span class="app-line"></span>
-            <span class="app-name">Typing Test</span>
-        </button>
-
-        <button class="sidebar-app" data-app-key="spotify" data-app-url="/spotify?embed=1">
-            <span class="app-line"></span>
-            <span class="app-name">Spotify Statistics</span>
-        </button>
-
-        <button class="sidebar-app" data-app-key="sudoku" data-app-url="/sudoku?embed=1">
-            <span class="app-line"></span>
-            <span class="app-name">Sudoku Lab</span>
-        </button>
+        {% endfor %}
     </aside>
     <div id="sidebar-resizer" class="sidebar-resizer" role="separator" aria-label="Resize sidebar" aria-orientation="vertical" aria-valuemin="220" aria-valuemax="900"></div>
 
     <section class="applet-panel">
         <div class="applet-header">
-            <h2 id="applet-title">Abbi's Class Scheduler</h2>
-            <p id="applet-description">Branch-and-bound assignment engine for optimal student-to-slot scheduling.</p>
-            <a id="open-standalone" class="standalone-link" href="/schedule" target="_blank" rel="noopener noreferrer">Open Standalone</a>
+            <h2 id="applet-title">Welcome to Fyrian's Apps</h2>
+            <p id="applet-description">A one-stop hub for the tools I built for my family members and friends. Pick any applet from the left to get started.</p>
+            <a id="open-standalone" class="standalone-link hidden-link" href="#" target="_blank" rel="noopener noreferrer">Open Standalone</a>
         </div>
 
-        <div class="applet-frame-wrap">
-            <iframe id="applet-frame" class="applet-frame" src="/schedule?embed=1" title="Selected applet"></iframe>
+        <div class="applet-frame-wrap" id="applet-frame-wrap">
+            <div id="applet-loading" class="applet-loading" aria-hidden="true"></div>
+            <div id="welcome-panel" class="welcome-panel">
+                <h3>Built for the people I care about</h3>
+                <p>These applets are designed to be practical, friendly, and fast for everyday use. Choose one from the sidebar and your workspace will load here.</p>
+            </div>
+            <div id="applet-frame-stack" class="applet-frame-stack"></div>
         </div>
     </section>
 </div>
+
+<script id="applets-data" type="application/json">{{ applets | tojson }}</script>
 {% endblock %}
 
 {% block extra_js %}

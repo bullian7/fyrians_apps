@@ -1,29 +1,8 @@
-const APP_INFO = {
-    schedule: {
-        title: 'Abbi\'s Class Scheduler',
-        description: 'Branch-and-bound assignment engine for optimal student-to-slot scheduling.',
-        standalone: '/schedule'
-    },
-    typing: {
-        title: 'Typing Test',
-        description: 'Minimal typing trainer with speed and accuracy tracking.',
-        standalone: '/typing'
-    },
-    spotify: {
-        title: 'Spotify Statistics',
-        description: 'Top tracks, artists, and listening patterns across multiple ranges.',
-        standalone: '/spotify'
-    },
-    sudoku: {
-        title: 'Sudoku Lab',
-        description: 'Generate fresh Sudoku boards with difficulty control and pencil marks.',
-        standalone: '/sudoku'
-    }
-};
-
 document.addEventListener('DOMContentLoaded', () => {
     const homeShell = document.querySelector('.home-shell');
-    const frame = document.getElementById('applet-frame');
+    const frameStack = document.getElementById('applet-frame-stack');
+    const loadingBar = document.getElementById('applet-loading');
+    const welcomePanel = document.getElementById('welcome-panel');
     const themeSelector = document.getElementById('theme-selector');
     const title = document.getElementById('applet-title');
     const description = document.getElementById('applet-description');
@@ -31,10 +10,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const sidebarResizer = document.getElementById('sidebar-resizer');
     const buttons = Array.from(document.querySelectorAll('.sidebar-app'));
+
+    const appletsDataEl = document.getElementById('applets-data');
+    const applets = JSON.parse((appletsDataEl && appletsDataEl.textContent) || '[]');
+    const APP_INFO = Object.fromEntries(applets.map((app) => [app.key, app]));
+
     const sidebarStorageKey = 'fyrian_sidebar_collapsed';
     const sidebarWidthStorageKey = 'fyrian_sidebar_width';
     const minSidebarWidth = 220;
     const maxSidebarWidth = 900;
+
+    let activeKey = null;
     let isDragging = false;
 
     function clampWidth(width) {
@@ -56,45 +42,107 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(sidebarStorageKey, collapsed ? '1' : '0');
     }
 
-    function activateButton(btn) {
-        buttons.forEach((item) => item.classList.remove('active'));
-        btn.classList.add('active');
+    function setLoading(on) {
+        loadingBar.classList.toggle('active', on);
+    }
 
-        const appKey = btn.dataset.appKey;
-        const appUrl = btn.dataset.appUrl;
-        const appMeta = APP_INFO[appKey];
+    function resolveTheme(theme) {
+        if (theme === 'system') {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        return theme;
+    }
 
-        frame.src = appUrl;
+    function applyThemeToIframe(iframe, theme) {
+        const doc = iframe.contentDocument;
+        if (!doc) return;
+        doc.documentElement.setAttribute('data-theme', resolveTheme(theme));
+    }
+
+    function applyThemeToAllFrames(theme) {
+        frameStack.querySelectorAll('iframe').forEach((iframe) => applyThemeToIframe(iframe, theme));
+    }
+
+    function getFrameForKey(key) {
+        return frameStack.querySelector(`iframe[data-app-key="${key}"]`);
+    }
+
+    function createFrameForApplet(appMeta) {
+        const iframe = document.createElement('iframe');
+        iframe.className = 'applet-frame';
+        iframe.dataset.appKey = appMeta.key;
+        iframe.dataset.loaded = '0';
+        iframe.title = appMeta.title;
+        iframe.src = appMeta.embed;
+
+        iframe.addEventListener('load', () => {
+            iframe.dataset.loaded = '1';
+            const currentTheme = localStorage.getItem('fyrian_theme') || 'system';
+            applyThemeToIframe(iframe, currentTheme);
+            if (activeKey === appMeta.key) {
+                setLoading(false);
+            }
+        });
+
+        frameStack.appendChild(iframe);
+        return iframe;
+    }
+
+    function activateButtonUI(key) {
+        buttons.forEach((btn) => {
+            btn.classList.toggle('active', btn.dataset.appKey === key);
+        });
+    }
+
+    function showFrame(key) {
+        frameStack.querySelectorAll('iframe').forEach((iframe) => {
+            iframe.classList.toggle('active', iframe.dataset.appKey === key);
+        });
+    }
+
+    function activateApplet(key) {
+        const appMeta = APP_INFO[key];
+        if (!appMeta) return;
+
+        activeKey = key;
+        if (welcomePanel) {
+            welcomePanel.classList.add('hidden');
+        }
+        activateButtonUI(key);
         title.textContent = appMeta.title;
         description.textContent = appMeta.description;
         standalone.href = appMeta.standalone;
-    }
+        standalone.classList.remove('hidden-link');
 
-    function applyThemeToIframe(theme) {
-        const doc = frame?.contentDocument;
-        if (!doc) return;
+        let frame = getFrameForKey(key);
+        if (!frame) {
+            setLoading(true);
+            frame = createFrameForApplet(appMeta);
+        } else if (frame.dataset.loaded !== '1') {
+            setLoading(true);
+        } else {
+            setLoading(false);
+        }
 
-        const resolvedTheme = theme === 'system'
-            ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-            : theme;
-
-        doc.documentElement.setAttribute('data-theme', resolvedTheme);
+        showFrame(key);
     }
 
     buttons.forEach((btn) => {
-        btn.addEventListener('click', () => activateButton(btn));
-    });
-
-    frame.addEventListener('load', () => {
-        const currentTheme = localStorage.getItem('fyrian_theme') || 'system';
-        applyThemeToIframe(currentTheme);
+        btn.addEventListener('click', () => activateApplet(btn.dataset.appKey));
     });
 
     if (themeSelector) {
         themeSelector.addEventListener('change', (event) => {
-            applyThemeToIframe(event.target.value);
+            applyThemeToAllFrames(event.target.value);
         });
     }
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        const selected = localStorage.getItem('fyrian_theme') || 'system';
+        if (selected === 'system') {
+            applyThemeToAllFrames('system');
+        }
+    });
 
     if (sidebarToggle) {
         const savedState = localStorage.getItem(sidebarStorageKey);
@@ -150,4 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    setLoading(false);
 });
