@@ -83,12 +83,7 @@ function renderOverview(data, range) {
         : 0;
     document.getElementById('ov-popularity').textContent = avgPop;
 
-    // Estimated listen time: sum of track durations × rough play weight
-    const totalMs = tracks.reduce((s, t) => s + (t.duration_ms || 0), 0);
-    document.getElementById('ov-duration').textContent = msToHours(totalMs);
 
-    // Range label
-    document.getElementById('ov-range-label').textContent = RANGES[range] || range;
 }
 
 function renderTracks(tracks) {
