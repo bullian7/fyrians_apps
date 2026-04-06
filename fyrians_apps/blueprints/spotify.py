@@ -88,7 +88,8 @@ def spotify():
     token = get_token()
     user, err = spotify_get('/me', token)
     if err:
-        session.clear()
+        session.pop('spotify_access_token', None)
+        session.pop('spotify_refresh_token', None)
         return render_template('spotify.html', logged_in=False, user=None)
 
     return render_template('spotify.html', logged_in=True, user=user)

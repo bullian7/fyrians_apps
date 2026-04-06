@@ -42,6 +42,35 @@
     line-height: 1.45;
 }
 
+.saved-runs-box {
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 0.7rem;
+    margin-bottom: 1rem;
+    background: color-mix(in srgb, var(--surface2) 82%, #000 18%);
+}
+
+.saved-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 0.45rem;
+}
+
+#saved-run-select {
+    background: color-mix(in srgb, var(--surface) 90%, #000 10%);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    color: var(--text-active);
+    padding: 8px 10px;
+    font-size: 0.85rem;
+}
+
+.saved-hint {
+    margin-top: 0.45rem;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+}
+
 .count-controls {
     display: flex;
     align-items: center;
@@ -406,9 +435,81 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .saved-row {
+        grid-template-columns: 1fr;
+    }
+
     .perf-row {
         justify-content: space-between;
         flex-wrap: wrap;
         gap: 0.6rem;
     }
+}
+
+@media (max-width: 520px) {
+    .step {
+        padding: 0.85rem;
+    }
+
+    .step h2 {
+        font-size: 1.2rem;
+    }
+
+    .hint {
+        font-size: 0.82rem;
+    }
+
+    .count-controls {
+        justify-content: center;
+    }
+
+    #count-display {
+        font-size: 2.2rem;
+        min-width: 52px;
+    }
+
+    .student-card-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.45rem;
+    }
+
+    .prefs-row {
+        grid-template-columns: 1fr;
+        gap: 0.35rem;
+    }
+
+    .assignments-table {
+        font-size: 0.82rem;
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .score-main {
+        font-size: 3rem;
+    }
+}
+
+.schedule-stats-panel {
+    margin-top: 0.55rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 0.65rem;
+    background: color-mix(in srgb, var(--surface2) 82%, #000 18%);
+}
+
+.schedule-stats-content {
+    display: grid;
+    gap: 0.28rem;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}
+
+.schedule-stats-content .stats-heading {
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.74rem;
+    margin-top: 0.3rem;
 }

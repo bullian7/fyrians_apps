@@ -20,6 +20,20 @@
         <div class="step-label">01 — setup</div>
         <h2>How many students?</h2>
         <p class="hint">Each student will be assigned to one unique time slot.</p>
+        <div class="saved-runs-box">
+            <div class="saved-row">
+                <select id="saved-run-select">
+                    <option value="">Saved schedules (sign in to use)</option>
+                </select>
+                <button class="back-btn" id="load-saved-run">Load Saved</button>
+                <button class="back-btn hidden" id="undo-load-run">Undo Load</button>
+                <button class="back-btn" id="schedule-stats-toggle">My Stats</button>
+            </div>
+            <p class="saved-hint" id="saved-run-status">Load a previous schedule, make edits, and rerun.</p>
+            <div id="schedule-stats-panel" class="schedule-stats-panel hidden">
+                <div id="schedule-stats-content" class="schedule-stats-content"></div>
+            </div>
+        </div>
         <div class="count-controls">
             <button class="icon-btn" id="decrement">−</button>
             <span id="count-display">3</span>

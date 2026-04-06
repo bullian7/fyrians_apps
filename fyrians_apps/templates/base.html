@@ -22,15 +22,27 @@
         </div>
         <div class="nav-controls">
             {% block nav_back %}{% endblock %}
-            <label class="cursor-toggle" for="cursor-follower-toggle">
-                <input type="checkbox" id="cursor-follower-toggle" checked>
-                <span>Cursor Follower</span>
-            </label>
-            <select id="theme-selector" class="theme-selector">
-                <option value="system">System</option>
-                <option value="dark">Dark</option>
-                <option value="light">Light</option>
-            </select>
+            <div class="settings-wrap">
+                <button id="settings-toggle" class="settings-btn" type="button" aria-expanded="false" aria-controls="settings-menu">Settings</button>
+                <div id="settings-menu" class="settings-menu hidden" role="menu" aria-label="Settings menu">
+                    <label class="cursor-toggle" for="cursor-follower-toggle">
+                        <input type="checkbox" id="cursor-follower-toggle" checked>
+                        <span>Cursor Follower</span>
+                    </label>
+                    <select id="theme-selector" class="theme-selector">
+                        <option value="system">System</option>
+                        <option value="dark">Dark</option>
+                        <option value="light">Light</option>
+                    </select>
+                </div>
+            </div>
+            <a href="/account" class="account-link">
+                {% if current_user %}
+                {{ current_user.username }}
+                {% else %}
+                Account
+                {% endif %}
+            </a>
         </div>
     </nav>
     {% endif %}
@@ -45,6 +57,7 @@
     {% endif %}
 
     <script src="{{ url_for('static', filename='js/cursor-slash.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/base-ui.js') }}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

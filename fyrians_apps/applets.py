@@ -48,5 +48,15 @@ APPLETS = [
         'standalone': '/sudoku',
         'embed': '/sudoku?embed=1',
         'sigil': '[SU]'
+    },
+    {
+        'key': 'listmaker',
+        'name': 'List Maker',
+        'title': 'List Maker',
+        'category': 'productivity',
+        'description': 'Create multiple lists, quickly add items, cross them out, and delete items any time.',
+        'standalone': '/listmaker',
+        'embed': '/listmaker?embed=1',
+        'sigil': '[LM]'
     }
 ]

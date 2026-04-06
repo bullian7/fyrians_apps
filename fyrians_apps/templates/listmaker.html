@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/listmaker.css') }}">
+{% endblock %}
+
+{% block nav_back %}
+<a href="/" class="back-link">← Back to Apps</a>
+{% endblock %}
+
+{% block content %}
+<div class="container listmaker-layout">
+    <header class="app-header">
+        <h1>List Maker</h1>
+        <p class="subtitle">create lists, check off tasks, keep control</p>
+    </header>
+
+    <section class="listmaker-shell">
+        <div class="listmaker-top">
+            <div class="list-controls">
+                <input id="new-list-name" type="text" placeholder="New list name">
+                <button id="create-list-btn" class="primary-btn" type="button">Create List</button>
+            </div>
+            <div class="list-switcher">
+                <label for="list-select">Current List</label>
+                <select id="list-select"></select>
+                <button id="delete-list-btn" class="tool-btn" type="button">Delete List</button>
+            </div>
+        </div>
+
+        <div class="item-controls">
+            <input id="new-item-text" type="text" placeholder="Add an item and press Enter">
+            <button id="add-item-btn" class="primary-btn" type="button">Add Item</button>
+        </div>
+
+        <div id="list-status" class="list-status">Create a list to get started.</div>
+
+        <ul id="items-list" class="items-list"></ul>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/listmaker.js') }}"></script>
+{% endblock %}

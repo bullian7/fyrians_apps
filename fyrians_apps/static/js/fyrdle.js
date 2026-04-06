@@ -31,6 +31,9 @@ const colorblindToggle = document.getElementById('colorblind-toggle');
 const newGameBtn = document.getElementById('new-fyrdle-btn');
 const playAgainBtn = document.getElementById('play-again-btn');
 const shareBtn = document.getElementById('share-btn');
+const fyrdleStatsToggle = document.getElementById('fyrdle-stats-toggle');
+const fyrdleStatsPanel = document.getElementById('fyrdle-stats-panel');
+const fyrdleStatsContent = document.getElementById('fyrdle-stats-content');
 
 const settings = {
     mode: localStorage.getItem(STORAGE.mode) || 'random',
@@ -54,6 +57,58 @@ let gameComplete = false;
 let isWin = false;
 let dailyKey = '';
 let gameStartedAt = Date.now();
+
+function renderFyrdleStats(payload) {
+    const overall = payload.overall || {};
+    const played = Number(overall.played || 0);
+    const wins = Number(overall.wins || 0);
+    const winRate = played > 0 ? Math.round((wins / played) * 100) : 0;
+
+    const lines = [
+        `<div><strong>Games:</strong> ${played}</div>`,
+        `<div><strong>Wins:</strong> ${wins} (${winRate}%)</div>`,
+        `<div><strong>Avg guesses (wins):</strong> ${Number(overall.avg_win_guesses || 0).toFixed(2)}</div>`,
+        '<div class="stats-heading">By Mode</div>'
+    ];
+
+    (payload.by_mode || []).forEach((row) => {
+        const rowPlayed = Number(row.played || 0);
+        const rowWins = Number(row.wins || 0);
+        const rowRate = rowPlayed ? Math.round((rowWins / rowPlayed) * 100) : 0;
+        lines.push(`<div>${row.mode}: ${rowWins}/${rowPlayed} wins (${rowRate}%)</div>`);
+    });
+
+    lines.push('<div class="stats-heading">By Hard Mode</div>');
+    (payload.by_hard_mode || []).forEach((row) => {
+        const label = Number(row.hard_mode) ? 'Hard On' : 'Hard Off';
+        const rowPlayed = Number(row.played || 0);
+        const rowWins = Number(row.wins || 0);
+        const rowRate = rowPlayed ? Math.round((rowWins / rowPlayed) * 100) : 0;
+        lines.push(`<div>${label}: ${rowWins}/${rowPlayed} wins (${rowRate}%)</div>`);
+    });
+
+    lines.push('<div class="stats-heading">Recent</div>');
+    (payload.recent || []).slice(0, 6).forEach((row) => {
+        lines.push(`<div>${row.won ? 'Win' : 'Loss'} · ${row.guesses_used}/${row.max_guesses} · ${row.mode}</div>`);
+    });
+
+    fyrdleStatsContent.innerHTML = lines.join('');
+}
+
+async function loadFyrdleStats() {
+    fyrdleStatsContent.innerHTML = '<div>Loading stats...</div>';
+    try {
+        const response = await fetch('/api/fyrdle/stats');
+        const payload = await response.json();
+        if (!response.ok) {
+            fyrdleStatsContent.innerHTML = `<div>${payload.error || 'Could not load stats.'}</div><div>Sign in via Account to track your results.</div>`;
+            return;
+        }
+        renderFyrdleStats(payload);
+    } catch (_err) {
+        fyrdleStatsContent.innerHTML = '<div>Could not load stats right now.</div>';
+    }
+}
 
 function setStatus(primary, secondary = '') {
     statusEl.textContent = primary;
@@ -315,8 +370,30 @@ function validateHardMode(nextGuess) {
     return '';
 }
 
+async function recordFyrdleGame(win, usedRows, elapsedSeconds) {
+    try {
+        await fetch('/api/fyrdle/record', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                won: !!win,
+                guesses_used: Number(usedRows) || 0,
+                max_guesses: settings.maxGuesses,
+                mode: settings.mode,
+                hard_mode: settings.hardMode,
+                elapsed_seconds: Number(elapsedSeconds) || 0,
+                solution
+            })
+        });
+    } catch (_err) {
+        // ignore network/auth issues here
+    }
+}
+
 function openCompletionPanel(win, usedRows) {
     const elapsedSeconds = Math.max(1, Math.round((Date.now() - gameStartedAt) / 1000));
+    void recordFyrdleGame(win, usedRows, elapsedSeconds);
+
     const stats = getStats();
     stats.played += 1;
 
@@ -593,6 +670,15 @@ function attachEvents() {
 
     playAgainBtn.addEventListener('click', startNewGame);
     shareBtn.addEventListener('click', copyResult);
+
+    fyrdleStatsToggle.addEventListener('click', async () => {
+        const opening = fyrdleStatsPanel.classList.contains('hidden');
+        fyrdleStatsPanel.classList.toggle('hidden');
+        fyrdleStatsToggle.classList.toggle('active', opening);
+        if (opening) {
+            await loadFyrdleStats();
+        }
+    });
 }
 
 async function init() {

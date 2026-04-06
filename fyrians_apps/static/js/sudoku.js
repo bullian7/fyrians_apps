@@ -37,6 +37,9 @@ const completeMessageEl = document.getElementById('sudoku-complete-message');
 const completeStatsEl = document.getElementById('sudoku-complete-stats');
 const playAgainBtnEl = document.getElementById('sudoku-play-again-btn');
 const shareBtnEl = document.getElementById('sudoku-share-btn');
+const sudokuStatsToggleEl = document.getElementById('sudoku-stats-toggle');
+const sudokuStatsPanelEl = document.getElementById('sudoku-stats-panel');
+const sudokuStatsContentEl = document.getElementById('sudoku-stats-content');
 
 const sudokuWorker = typeof Worker !== 'undefined' ? new Worker('/static/js/sudoku-worker.js') : null;
 const pendingWorkerJobs = new Map();
@@ -58,6 +61,50 @@ function formatTime(totalSeconds) {
     const mins = Math.floor(totalSeconds / 60);
     const secs = totalSeconds % 60;
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+function renderSudokuStats(payload) {
+    const overall = payload.overall || {};
+    const games = Number(overall.games || 0);
+    const solved = Number(overall.solved || 0);
+    const solveRate = games > 0 ? Math.round((solved / games) * 100) : 0;
+
+    const lines = [
+        `<div><strong>Games:</strong> ${games}</div>`,
+        `<div><strong>Solved:</strong> ${solved} (${solveRate}%)</div>`,
+        `<div><strong>Avg solve:</strong> ${overall.avg_solve_seconds ? formatTime(overall.avg_solve_seconds) : '--:--'}</div>`,
+        `<div><strong>Best solve:</strong> ${overall.best_solve_seconds ? formatTime(overall.best_solve_seconds) : '--:--'}</div>`,
+        '<div class="stats-heading">By Difficulty</div>'
+    ];
+
+    (payload.by_difficulty || []).forEach((row) => {
+        const rowGames = Number(row.games || 0);
+        const rowSolved = Number(row.solved || 0);
+        const rowRate = rowGames > 0 ? Math.round((rowSolved / rowGames) * 100) : 0;
+        lines.push(`<div>${row.difficulty}: ${rowSolved}/${rowGames} solved (${rowRate}%) · avg ${row.avg_solve_seconds ? formatTime(row.avg_solve_seconds) : '--:--'}</div>`);
+    });
+
+    lines.push('<div class="stats-heading">Recent</div>');
+    (payload.recent || []).slice(0, 6).forEach((row) => {
+        lines.push(`<div>${row.difficulty} · ${row.solved ? 'Solved' : 'Abandoned'} · ${formatTime(row.solve_seconds || 0)} · conflicts ${row.conflicts}</div>`);
+    });
+
+    sudokuStatsContentEl.innerHTML = lines.join('');
+}
+
+async function loadSudokuStats() {
+    sudokuStatsContentEl.innerHTML = '<div>Loading stats...</div>';
+    try {
+        const response = await fetch('/api/sudoku/stats');
+        const payload = await response.json();
+        if (!response.ok) {
+            sudokuStatsContentEl.innerHTML = `<div>${payload.error || 'Could not load stats.'}</div><div>Sign in via Account to track your results.</div>`;
+            return;
+        }
+        renderSudokuStats(payload);
+    } catch (_err) {
+        sudokuStatsContentEl.innerHTML = '<div>Could not load stats right now.</div>';
+    }
 }
 
 function getStats() {
@@ -116,7 +163,25 @@ function recordAttempt(solved, solveSeconds = 0) {
     }
 
     saveStats(stats);
+    void recordSudokuRun({
+        difficulty: currentDifficulty,
+        solved: !!solved,
+        solve_seconds: Number(solveSeconds) || 0,
+        conflicts: getConflictCount()
+    });
     return stats;
+}
+
+async function recordSudokuRun(payload) {
+    try {
+        await fetch('/api/sudoku/record', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+    } catch (_err) {
+        // ignore network/auth issues here
+    }
 }
 
 function shuffle(values) {
@@ -706,6 +771,14 @@ function bindEvents() {
         maybeGeneratePuzzle(true);
     });
     shareBtnEl.addEventListener('click', copyResult);
+    sudokuStatsToggleEl.addEventListener('click', async () => {
+        const opening = sudokuStatsPanelEl.classList.contains('hidden');
+        sudokuStatsPanelEl.classList.toggle('hidden');
+        sudokuStatsToggleEl.classList.toggle('active', opening);
+        if (opening) {
+            await loadSudokuStats();
+        }
+    });
 
     document.addEventListener('keydown', handleKeydown);
 }

@@ -505,4 +505,49 @@
 @media (max-width: 520px) {
     .stats-overview { grid-template-columns: 1fr; }
     .spotify-header-left h1 { font-size: 1.7rem; }
+
+    .spotify-layout {
+        width: 100%;
+    }
+
+    .spotify-header {
+        padding: 0.58rem;
+    }
+
+    .spotify-user-pill {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .range-tab {
+        flex: 1;
+        text-align: center;
+    }
+
+    .panel-title {
+        letter-spacing: 1.2px;
+    }
+
+    .track-item,
+    .artist-item,
+    .recent-item {
+        padding: 0.42rem 0.2rem;
+        gap: 0.45rem;
+    }
+
+    .track-duration,
+    .recent-time {
+        min-width: 44px;
+        font-size: 0.65rem;
+    }
+
+    .track-name,
+    .artist-name {
+        font-size: 0.78rem;
+    }
+
+    .track-artist,
+    .artist-genres {
+        font-size: 0.66rem;
+    }
 }

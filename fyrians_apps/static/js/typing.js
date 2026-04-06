@@ -13,6 +13,9 @@ const cursor = document.getElementById('cursor');
 const timerDisplay = document.getElementById('timer');
 const resultsDiv = document.getElementById('results');
 const testArea = document.querySelector('.test-area');
+const typingStatsToggle = document.getElementById('typing-stats-toggle');
+const typingStatsPanel = document.getElementById('typing-stats-panel');
+const typingStatsContent = document.getElementById('typing-stats-content');
 
 document.querySelectorAll('.time-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -40,6 +43,76 @@ document.getElementById('punct-toggle').addEventListener('click', (e) => {
 });
 
 document.getElementById('restart-btn').addEventListener('click', resetTest);
+
+function fmt(value, digits = 1) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return '--';
+    return n.toFixed(digits);
+}
+
+function modeLabel(mode) {
+    return mode === 'difficult' ? 'Difficult' : 'Normal';
+}
+
+function punctuationLabel(value) {
+    return Number(value) ? 'On' : 'Off';
+}
+
+function renderTypingStats(payload) {
+    const lines = [];
+    const overall = payload.overall || {};
+    lines.push(`<div><strong>Tests:</strong> ${overall.tests || 0}</div>`);
+    lines.push(`<div><strong>Avg net WPM:</strong> ${fmt(overall.avg_net_wpm, 2)}</div>`);
+    lines.push(`<div><strong>Avg raw WPM:</strong> ${fmt(overall.avg_raw_wpm, 2)}</div>`);
+    lines.push(`<div><strong>Avg accuracy:</strong> ${fmt(overall.avg_accuracy, 2)}%</div>`);
+    lines.push(`<div><strong>Best net WPM:</strong> ${fmt(overall.best_net_wpm, 2)}</div>`);
+
+    lines.push('<div class="stats-heading">By Time</div>');
+    (payload.by_time || []).forEach((row) => {
+        lines.push(`<div>${row.time_limit}s: ${fmt(row.avg_net_wpm, 2)} net · ${fmt(row.avg_accuracy, 1)}% acc (${row.tests} tests)</div>`);
+    });
+
+    lines.push('<div class="stats-heading">By Difficulty</div>');
+    (payload.by_mode || []).forEach((row) => {
+        lines.push(`<div>${modeLabel(row.mode)}: ${fmt(row.avg_net_wpm, 2)} net · ${fmt(row.avg_accuracy, 1)}% acc (${row.tests} tests)</div>`);
+    });
+
+    lines.push('<div class="stats-heading">By Punctuation</div>');
+    (payload.by_punctuation || []).forEach((row) => {
+        lines.push(`<div>Punctuation ${punctuationLabel(row.punctuation)}: ${fmt(row.avg_net_wpm, 2)} net · ${fmt(row.avg_accuracy, 1)}% acc (${row.tests} tests)</div>`);
+    });
+
+    lines.push('<div class="stats-heading">Difficulty + Punctuation + Time</div>');
+    (payload.by_combo || []).forEach((row) => {
+        lines.push(`<div>${modeLabel(row.mode)} · Punctuation ${punctuationLabel(row.punctuation)} · ${row.time_limit}s: ${fmt(row.avg_net_wpm, 2)} net (${row.tests})</div>`);
+    });
+
+    typingStatsContent.innerHTML = lines.join('');
+}
+
+async function loadTypingStats() {
+    typingStatsContent.innerHTML = '<div>Loading stats...</div>';
+    try {
+        const response = await fetch('/api/typing/stats');
+        const payload = await response.json();
+        if (!response.ok) {
+            typingStatsContent.innerHTML = `<div>${payload.error || 'Could not load stats.'}</div><div>Sign in via Account to track your results.</div>`;
+            return;
+        }
+        renderTypingStats(payload);
+    } catch (_err) {
+        typingStatsContent.innerHTML = '<div>Could not load stats right now.</div>';
+    }
+}
+
+typingStatsToggle.addEventListener('click', async () => {
+    const opening = typingStatsPanel.classList.contains('hidden');
+    typingStatsPanel.classList.toggle('hidden');
+    typingStatsToggle.classList.toggle('active', opening);
+    if (opening) {
+        await loadTypingStats();
+    }
+});
 
 async function fetchWords(append = false) {
     try {
@@ -165,6 +238,18 @@ window.addEventListener('keydown', (e) => {
     updateCursor();
 });
 
+async function recordTypingTest(payload) {
+    try {
+        await fetch('/api/typing/record', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+    } catch (_err) {
+        // ignore network/auth issues here
+    }
+}
+
 function startTimer() {
     isPlaying = true;
     timeLeft = timeLimit;
@@ -210,6 +295,16 @@ function endTest() {
     document.getElementById('accuracy').innerText = Math.round(accuracy) + '%';
     document.getElementById('correct-words').innerText = correctWordsCount;
     document.getElementById('incorrect-words').innerText = incorrectWordsCount;
+    void recordTypingTest({
+        mode: wordMode,
+        time_limit: timeLimit,
+        punctuation: usePunctuation,
+        raw_wpm: Math.round(Math.max(0, rawWPM) * 100) / 100,
+        net_wpm: Math.round(Math.max(0, netWPM) * 100) / 100,
+        accuracy: Math.round(accuracy * 100) / 100,
+        correct_words: correctWordsCount,
+        incorrect_words: incorrectWordsCount
+    });
 }
 
 function resetTest() {

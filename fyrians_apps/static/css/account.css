@@ -1,0 +1,120 @@
+.account-layout {
+    width: min(980px, 100%);
+}
+
+.account-card {
+    background: linear-gradient(150deg, color-mix(in srgb, var(--surface2) 84%, #000 16%), color-mix(in srgb, var(--surface) 92%, #000 8%));
+    border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border-subtle) 78%);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.account-card h2 {
+    color: var(--primary);
+    margin-bottom: 0.45rem;
+}
+
+.account-hint {
+    font-size: 0.84rem;
+    color: var(--text-dim);
+    margin-bottom: 0.8rem;
+}
+
+.auth-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-bottom: 0.7rem;
+}
+
+.auth-grid input {
+    border: 1px solid var(--border-subtle);
+    background: color-mix(in srgb, var(--surface2) 86%, #000 14%);
+    color: var(--text-active);
+    border-radius: 8px;
+    padding: 0.55rem 0.65rem;
+}
+
+.auth-actions {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+}
+
+.account-status {
+    min-height: 1.2rem;
+    margin-top: 0.65rem;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+}
+
+.account-status.error {
+    color: var(--error);
+}
+
+.dash-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 0.8rem;
+}
+
+.dash-head h2 {
+    margin: 0;
+}
+
+.dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.dash-panel {
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 0.75rem;
+    background: color-mix(in srgb, var(--surface2) 84%, #000 16%);
+}
+
+.dash-panel h3 {
+    margin-bottom: 0.45rem;
+    color: var(--text-active);
+}
+
+.dash-stats {
+    display: grid;
+    gap: 0.26rem;
+    font-size: 0.82rem;
+}
+
+.tool-btn {
+    border: 1px solid var(--border-subtle);
+    background: color-mix(in srgb, var(--surface2) 86%, #000 14%);
+    color: var(--text-active);
+    border-radius: 8px;
+    padding: 0.5rem 0.7rem;
+    cursor: pointer;
+}
+
+@media (max-width: 760px) {
+    .auth-grid,
+    .dash-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .account-card {
+        padding: 0.75rem;
+    }
+
+    .auth-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dash-head {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

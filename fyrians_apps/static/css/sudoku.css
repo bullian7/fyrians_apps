@@ -421,3 +421,74 @@
         padding: 0.58rem;
     }
 }
+
+@media (max-width: 520px) {
+    .sudoku-header h1 {
+        font-size: 1.72rem;
+    }
+
+    .sudoku-header .subtitle {
+        font-size: 0.62rem;
+        letter-spacing: 2px;
+    }
+
+    .sudoku-toolbar {
+        padding: 0.5rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .toolbar-left,
+    .toolbar-right {
+        width: 100%;
+        justify-content: stretch;
+        gap: 0.45rem;
+    }
+
+    .difficulty-group,
+    .tool-btn,
+    .primary-btn {
+        width: 100%;
+    }
+
+    .diff-btn {
+        flex: 1;
+        padding: 0.46rem 0.45rem;
+    }
+
+    .board-shell {
+        padding: 0.46rem;
+    }
+
+    .keypad-card,
+    .status-box {
+        padding: 0.48rem;
+    }
+
+    .sudoku-complete-actions {
+        flex-direction: column;
+    }
+}
+
+.sudoku-stats-panel {
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    background: var(--panel-bg);
+    box-shadow: var(--soft-shadow);
+    padding: 0.7rem;
+    margin-bottom: 0.85rem;
+}
+
+.sudoku-stats-content {
+    display: grid;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}
+
+.sudoku-stats-content .stats-heading {
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.75rem;
+    margin-top: 0.35rem;
+}

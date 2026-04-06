@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}">
+{% endblock %}
+
+{% block nav_back %}
+<a href="/" class="back-link">← Back to Apps</a>
+{% endblock %}
+
+{% block content %}
+<div class="container account-layout">
+    <header class="app-header">
+        <h1>Account</h1>
+        <p class="subtitle">local profile and cross-applet stats</p>
+    </header>
+
+    <section id="auth-section" class="account-card">
+        <h2>Sign in or create account</h2>
+        <p class="account-hint">Use any name and passcode. Passcodes are stored hashed in local SQLite.</p>
+        <div class="auth-grid">
+            <input id="account-name" type="text" placeholder="Name">
+            <input id="account-passcode" type="password" placeholder="Passcode">
+        </div>
+        <div class="auth-actions">
+            <button id="account-login-btn" class="primary-btn" type="button">Sign In</button>
+            <button id="account-register-btn" class="tool-btn" type="button">Create Account</button>
+        </div>
+        <p id="account-status" class="account-status"></p>
+    </section>
+
+    <section id="dashboard-section" class="account-card hidden">
+        <div class="dash-head">
+            <h2 id="dash-title">Your Dashboard</h2>
+            <button id="account-logout-btn" class="tool-btn" type="button">Sign Out</button>
+        </div>
+
+        <div class="dash-grid">
+            <article class="dash-panel">
+                <h3>Fyrdle</h3>
+                <div id="dash-fyrdle" class="dash-stats"></div>
+            </article>
+            <article class="dash-panel">
+                <h3>Typing</h3>
+                <div id="dash-typing" class="dash-stats"></div>
+            </article>
+            <article class="dash-panel">
+                <h3>Sudoku</h3>
+                <div id="dash-sudoku" class="dash-stats"></div>
+            </article>
+            <article class="dash-panel">
+                <h3>Schedule</h3>
+                <div id="dash-schedule" class="dash-stats"></div>
+            </article>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/account.js') }}"></script>
+{% endblock %}

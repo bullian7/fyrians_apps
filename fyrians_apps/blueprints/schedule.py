@@ -1,7 +1,10 @@
 import heapq
+import json
 import time
 
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, g, jsonify, render_template, request
+
+from db import get_db
 
 schedule_bp = Blueprint('schedule_bp', __name__)
 MAX_STUDENTS = 30
@@ -158,3 +161,117 @@ def api_optimize():
 
     result['timeMs'] = elapsed
     return jsonify(result)
+
+
+@schedule_bp.route('/api/schedule/save-run', methods=['POST'])
+def api_save_run():
+    user = g.get('current_user')
+    if not user:
+        return jsonify({'error': 'Sign in required'}), 401
+
+    payload = request.get_json(silent=True) or {}
+    run_payload = payload.get('payload') or {}
+    students = run_payload.get('students') or payload.get('students') or []
+    time_slots = run_payload.get('timeSlots') or payload.get('timeSlots') or []
+    result = payload.get('result') or {}
+    label = str(payload.get('label') or '').strip()[:120]
+
+    if not students or not time_slots:
+        return jsonify({'error': 'Missing schedule payload'}), 400
+
+    num_students = len(students)
+    if not run_payload:
+        run_payload = {'students': students, 'timeSlots': time_slots}
+
+    db = get_db()
+    cur = db.execute(
+        """
+        INSERT INTO schedule_runs (user_id, label, num_students, payload_json, result_json)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (
+            user['id'],
+            label or None,
+            num_students,
+            json.dumps(run_payload),
+            json.dumps(result or {}),
+        ),
+    )
+    db.commit()
+    return jsonify({'ok': True, 'run_id': cur.lastrowid})
+
+
+@schedule_bp.route('/api/schedule/history')
+def api_schedule_history():
+    user = g.get('current_user')
+    if not user:
+        return jsonify({'runs': []})
+
+    rows = get_db().execute(
+        """
+        SELECT id, created_at, label, num_students
+        FROM schedule_runs
+        WHERE user_id = ?
+        ORDER BY id DESC
+        LIMIT 30
+        """,
+        (user['id'],),
+    ).fetchall()
+    return jsonify({'runs': [dict(row) for row in rows]})
+
+
+@schedule_bp.route('/api/schedule/stats')
+def api_schedule_stats():
+    user = g.get('current_user')
+    if not user:
+        return jsonify({'error': 'Sign in required'}), 401
+
+    rows = get_db().execute(
+        """
+        SELECT id, created_at, label, num_students, result_json
+        FROM schedule_runs
+        WHERE user_id = ?
+        ORDER BY id DESC
+        LIMIT 100
+        """,
+        (user['id'],),
+    ).fetchall()
+
+    recent = []
+    satisfaction_values = []
+    first_choice_values = []
+    for row in rows[:12]:
+        result = {}
+        try:
+            result = json.loads(row['result_json'] or '{}')
+        except Exception:
+            result = {}
+
+        sat = result.get('satisfaction')
+        if isinstance(sat, (int, float)):
+            satisfaction_values.append(float(sat))
+
+        first_choice = result.get('firstChoice')
+        if isinstance(first_choice, (int, float)):
+            first_choice_values.append(float(first_choice))
+
+        recent.append({
+            'id': row['id'],
+            'created_at': row['created_at'],
+            'label': row['label'],
+            'num_students': row['num_students'],
+            'satisfaction': sat if isinstance(sat, (int, float)) else None,
+            'first_choice': first_choice if isinstance(first_choice, (int, float)) else None,
+        })
+
+    avg_satisfaction = sum(satisfaction_values) / len(satisfaction_values) if satisfaction_values else 0
+    avg_first_choice = sum(first_choice_values) / len(first_choice_values) if first_choice_values else 0
+
+    return jsonify({
+        'overall': {
+            'runs': len(rows),
+            'avg_satisfaction': round(avg_satisfaction, 2),
+            'avg_first_choice': round(avg_first_choice, 2),
+        },
+        'recent': recent,
+    })

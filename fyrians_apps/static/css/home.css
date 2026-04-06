@@ -430,3 +430,78 @@
         width: 100%;
     }
 }
+
+@media (max-width: 760px) {
+    .app-sidebar {
+        padding: 0.8rem 0.7rem;
+        gap: 0.35rem;
+    }
+
+    .sidebar-head {
+        margin-bottom: 0.25rem;
+    }
+
+    .sidebar-head h1 {
+        font-size: 1rem;
+    }
+
+    .sidebar-category-title {
+        font-size: 0.62rem;
+        letter-spacing: 1px;
+        padding: 0 0.3rem;
+    }
+
+    .sidebar-app {
+        padding: 0.56rem 0.45rem;
+        gap: 0.5rem;
+    }
+
+    .app-sigil {
+        min-width: 26px;
+        font-size: 0.72rem;
+    }
+
+    .app-line {
+        width: 20px;
+    }
+
+    .app-name {
+        font-size: 0.86rem;
+    }
+
+    .applet-panel {
+        padding: 0.55rem 0.55rem 0;
+    }
+
+    .applet-header {
+        padding: 0.25rem 0.1rem 0.6rem;
+    }
+
+    .applet-header h2 {
+        font-size: 1.02rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .applet-header p {
+        font-size: 0.8rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .applet-frame-wrap {
+        min-height: 68vh;
+    }
+
+    .welcome-panel {
+        padding: 1.2rem;
+        gap: 0.55rem;
+    }
+
+    .welcome-panel h3 {
+        font-size: 1.4rem;
+    }
+
+    .welcome-panel p {
+        font-size: 0.9rem;
+        line-height: 1.45;
+    }
+}

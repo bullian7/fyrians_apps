@@ -1,6 +1,8 @@
 from pathlib import Path
 
-from flask import Blueprint, jsonify, render_template
+from flask import Blueprint, g, jsonify, render_template, request
+
+from db import get_db
 
 fyrdle_bp = Blueprint('fyrdle_bp', __name__)
 
@@ -58,4 +60,99 @@ def api_fyrdle_words():
         'words': answer_words,
         'valid_words': valid_guess_words,
         'count': len(answer_words)
+    })
+
+
+@fyrdle_bp.route('/api/fyrdle/record', methods=['POST'])
+def api_fyrdle_record():
+    user = g.get('current_user')
+    if not user:
+        return jsonify({'error': 'Sign in required'}), 401
+
+    payload = request.get_json(silent=True) or {}
+    won = 1 if payload.get('won') else 0
+    guesses_used = int(payload.get('guesses_used') or 0)
+    max_guesses = int(payload.get('max_guesses') or 6)
+    mode = str(payload.get('mode') or 'random')[:20]
+    hard_mode = 1 if payload.get('hard_mode') else 0
+    elapsed_seconds = int(payload.get('elapsed_seconds') or 0)
+    solution = str(payload.get('solution') or '').lower()[:12]
+
+    db = get_db()
+    db.execute(
+        """
+        INSERT INTO fyrdle_games (user_id, won, guesses_used, max_guesses, mode, hard_mode, elapsed_seconds, solution)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (user['id'], won, guesses_used, max_guesses, mode, hard_mode, elapsed_seconds, solution),
+    )
+    db.commit()
+    return jsonify({'ok': True})
+
+
+@fyrdle_bp.route('/api/fyrdle/stats')
+def api_fyrdle_stats():
+    user = g.get('current_user')
+    if not user:
+        return jsonify({'error': 'Sign in required'}), 401
+
+    db = get_db()
+    user_id = user['id']
+
+    overall = db.execute(
+        """
+        SELECT
+            COUNT(*) AS played,
+            SUM(CASE WHEN won = 1 THEN 1 ELSE 0 END) AS wins,
+            AVG(CASE WHEN won = 1 THEN guesses_used ELSE NULL END) AS avg_win_guesses
+        FROM fyrdle_games
+        WHERE user_id = ?
+        """,
+        (user_id,),
+    ).fetchone()
+
+    by_mode = db.execute(
+        """
+        SELECT mode, COUNT(*) AS played,
+               SUM(CASE WHEN won = 1 THEN 1 ELSE 0 END) AS wins
+        FROM fyrdle_games
+        WHERE user_id = ?
+        GROUP BY mode
+        ORDER BY mode
+        """,
+        (user_id,),
+    ).fetchall()
+
+    by_hard = db.execute(
+        """
+        SELECT hard_mode, COUNT(*) AS played,
+               SUM(CASE WHEN won = 1 THEN 1 ELSE 0 END) AS wins
+        FROM fyrdle_games
+        WHERE user_id = ?
+        GROUP BY hard_mode
+        ORDER BY hard_mode
+        """,
+        (user_id,),
+    ).fetchall()
+
+    recent = db.execute(
+        """
+        SELECT played_at, won, guesses_used, max_guesses, mode, hard_mode, elapsed_seconds, solution
+        FROM fyrdle_games
+        WHERE user_id = ?
+        ORDER BY id DESC
+        LIMIT 12
+        """,
+        (user_id,),
+    ).fetchall()
+
+    return jsonify({
+        'overall': {
+            'played': int(overall['played'] or 0),
+            'wins': int(overall['wins'] or 0),
+            'avg_win_guesses': round(float(overall['avg_win_guesses'] or 0), 2),
+        },
+        'by_mode': [dict(row) for row in by_mode],
+        'by_hard_mode': [dict(row) for row in by_hard],
+        'recent': [dict(row) for row in recent],
     })

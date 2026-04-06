@@ -1,0 +1,173 @@
+.listmaker-layout {
+    width: min(960px, 100%);
+    --panel-bg: linear-gradient(150deg, color-mix(in srgb, var(--surface2) 82%, #000 18%), color-mix(in srgb, var(--surface) 92%, #000 8%));
+    --panel-border: color-mix(in srgb, var(--primary) 22%, var(--border-subtle) 78%);
+    --soft-shadow: 0 14px 34px rgba(0, 0, 0, 0.3);
+}
+
+.listmaker-shell {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 14px;
+    box-shadow: var(--soft-shadow);
+    padding: 1rem;
+    display: grid;
+    gap: 0.85rem;
+}
+
+.listmaker-top {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.8rem;
+}
+
+.list-controls,
+.item-controls {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.55rem;
+}
+
+.list-switcher {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.list-switcher label {
+    font-size: 0.76rem;
+    color: var(--text-mid);
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+}
+
+.listmaker-shell input,
+.listmaker-shell select {
+    border: 1px solid var(--border-subtle);
+    background: color-mix(in srgb, var(--surface2) 86%, #000 14%);
+    color: var(--text-active);
+    border-radius: 8px;
+    padding: 0.55rem 0.65rem;
+    font-size: 0.86rem;
+}
+
+#list-select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 2.4rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23d1d0c5' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px 8px;
+}
+
+.tool-btn {
+    border: 1px solid var(--border-subtle);
+    background: color-mix(in srgb, var(--surface2) 86%, #000 14%);
+    color: var(--text-active);
+    border-radius: 8px;
+    padding: 0.52rem 0.72rem;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+
+.list-status {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+}
+
+.items-list {
+    list-style: none;
+    display: grid;
+    gap: 0.45rem;
+}
+
+.item-row {
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    align-items: center;
+    gap: 0.55rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--surface2) 84%, #000 16%);
+    padding: 0.55rem 0.6rem;
+}
+
+.item-empty {
+    border: 1px dashed var(--border-subtle);
+    border-radius: 10px;
+    color: var(--text-dim);
+    padding: 0.75rem;
+    font-size: 0.85rem;
+}
+
+.item-toggle {
+    appearance: none;
+    width: 17px;
+    height: 17px;
+    border-radius: 999px;
+    border: 2px solid var(--primary);
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+}
+
+.item-toggle:checked::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 999px;
+    background: var(--primary);
+}
+
+.item-text {
+    color: var(--text-active);
+    font-size: 0.92rem;
+}
+
+.item-text.done {
+    text-decoration: line-through;
+    opacity: 0.65;
+}
+
+.item-delete {
+    border: 1px solid rgba(202, 71, 84, 0.45);
+    background: rgba(202, 71, 84, 0.12);
+    color: var(--error);
+    border-radius: 8px;
+    padding: 0.42rem 0.62rem;
+    font-size: 0.78rem;
+    cursor: pointer;
+}
+
+@media (max-width: 900px) {
+    .listmaker-top,
+    .list-controls,
+    .item-controls,
+    .list-switcher {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .listmaker-shell {
+        padding: 0.75rem;
+        gap: 0.65rem;
+    }
+
+    .list-status {
+        font-size: 0.76rem;
+    }
+
+    .item-row {
+        grid-template-columns: 22px 1fr;
+        gap: 0.45rem;
+    }
+
+    .item-delete {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+}
