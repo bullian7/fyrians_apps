@@ -3,6 +3,7 @@ let timeLeft = 30;
 let timerInterval = null;
 let isPlaying = false;
 let usePunctuation = false;
+let wordMode = 'normal';
 let currentWordIndex = 0;
 let currentLetterIndex = 0;
 let rawKeystrokes = 0;
@@ -22,6 +23,15 @@ document.querySelectorAll('.time-btn').forEach(btn => {
     });
 });
 
+document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        wordMode = e.target.dataset.mode;
+        resetTest();
+    });
+});
+
 document.getElementById('punct-toggle').addEventListener('click', (e) => {
     usePunctuation = !usePunctuation;
     e.target.innerText = usePunctuation ? 'On' : 'Off';
@@ -33,7 +43,7 @@ document.getElementById('restart-btn').addEventListener('click', resetTest);
 
 async function fetchWords(append = false) {
     try {
-        const response = await fetch('/api/words');
+        const response = await fetch(`/api/words?mode=${encodeURIComponent(wordMode)}`);
         let words = await response.json();
         if (usePunctuation) {
             words = words.map(w => {
@@ -95,16 +105,21 @@ function updateCursor() {
     if (isEndOfWord) cursorLeft += letterRect.width; 
 
     const firstWord = wordsContainer.children[0];
-    const wordTop = activeWord.offsetTop;           
-    const lineHeight = firstWord.offsetHeight;      
+    const wordTop = activeWord.offsetTop;
+    const lineHeight = firstWord.offsetHeight;
     const scrollAmount = Math.max(0, wordTop - lineHeight);
     wordsContainer.style.transform = `translateY(-${scrollAmount}px)`;
-    
-    cursor.style.left = `${cursorLeft}px`;
-    cursor.style.top = `${(wordTop - scrollAmount) + 6}px`; 
+    cursor.style.left = `${cursorLeft -4}px`;
+    cursor.style.top = `${(wordTop - scrollAmount) + 14}px`;
 }
 
 window.addEventListener('keydown', (e) => {
+    // Prevent spacebar from activating the focused restart button.
+    if (!resultsDiv.classList.contains('hidden') && e.key === ' ') {
+        e.preventDefault();
+        return;
+    }
+
     // Only intercept if we are actively viewing the typing area
     if (testArea.classList.contains('hidden')) return;
 

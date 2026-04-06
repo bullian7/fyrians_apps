@@ -16,38 +16,58 @@
     </header>
 
     <div class="sudoku-toolbar">
-        <div class="difficulty-group" role="group" aria-label="Difficulty">
-            <button class="diff-btn active" data-difficulty="easy">Easy</button>
-            <button class="diff-btn" data-difficulty="medium">Medium</button>
-            <button class="diff-btn" data-difficulty="hard">Hard</button>
+        <div class="toolbar-left">
+            <div class="difficulty-group" role="group" aria-label="Difficulty">
+                <button class="diff-btn active" data-difficulty="easy">Easy</button>
+                <button class="diff-btn" data-difficulty="medium">Medium</button>
+                <button class="diff-btn" data-difficulty="hard">Hard</button>
+            </div>
+            <button id="new-game-btn" class="primary-btn">Generate Puzzle</button>
         </div>
-
-        <button id="new-game-btn" class="primary-btn">New Puzzle</button>
-        <button id="notes-toggle" class="tool-btn" aria-pressed="false">Notes: Off</button>
-        <button id="clear-board-btn" class="tool-btn">Clear Entries</button>
+        <div class="toolbar-right">
+            <button id="notes-toggle" class="tool-btn" aria-pressed="false">Notes: Off</button>
+            <button id="clear-board-btn" class="tool-btn">Clear Entries</button>
+        </div>
     </div>
 
     <div class="sudoku-main">
-        <div id="sudoku-board" class="sudoku-board" aria-label="Sudoku board"></div>
+        <div class="board-shell">
+            <div id="sudoku-board" class="sudoku-board" aria-label="Sudoku board"></div>
+        </div>
 
         <div class="sudoku-side">
-            <div class="keypad" aria-label="Number keypad">
-                <button class="key-btn" data-value="1">1</button>
-                <button class="key-btn" data-value="2">2</button>
-                <button class="key-btn" data-value="3">3</button>
-                <button class="key-btn" data-value="4">4</button>
-                <button class="key-btn" data-value="5">5</button>
-                <button class="key-btn" data-value="6">6</button>
-                <button class="key-btn" data-value="7">7</button>
-                <button class="key-btn" data-value="8">8</button>
-                <button class="key-btn" data-value="9">9</button>
-                <button class="key-btn erase" data-value="0">Erase</button>
+            <div class="side-card keypad-card">
+                <div class="keypad" aria-label="Number keypad">
+                    <button class="key-btn" data-value="1">1</button>
+                    <button class="key-btn" data-value="2">2</button>
+                    <button class="key-btn" data-value="3">3</button>
+                    <button class="key-btn" data-value="4">4</button>
+                    <button class="key-btn" data-value="5">5</button>
+                    <button class="key-btn" data-value="6">6</button>
+                    <button class="key-btn" data-value="7">7</button>
+                    <button class="key-btn" data-value="8">8</button>
+                    <button class="key-btn" data-value="9">9</button>
+                    <button class="key-btn erase" data-value="0">Erase</button>
+                </div>
             </div>
 
-            <div class="status-box">
-                <div id="status-text">Puzzle ready</div>
-                <div id="mistake-text">Conflicts: 0</div>
+            <div class="status-box side-card">
+                <div id="status-text">Pick a difficulty and click Generate Puzzle.</div>
+                <div id="mistake-text">Conflicts: -</div>
+                <div id="timer-text">Time: 00:00</div>
                 <p class="help-text">Tip: press <strong>N</strong> to toggle notes mode.</p>
+            </div>
+        </div>
+
+        <div id="sudoku-complete" class="sudoku-complete hidden" aria-live="polite">
+            <div class="sudoku-complete-card">
+                <h2 id="sudoku-complete-title">Puzzle Complete</h2>
+                <p id="sudoku-complete-message">Great solve.</p>
+                <div id="sudoku-complete-stats" class="sudoku-complete-stats"></div>
+                <div class="sudoku-complete-actions">
+                    <button id="sudoku-play-again-btn" class="primary-btn" type="button">Generate Another</button>
+                    <button id="sudoku-share-btn" class="tool-btn" type="button">Copy Result</button>
+                </div>
             </div>
         </div>
     </div>

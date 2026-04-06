@@ -5,13 +5,34 @@
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let isEnabled = localStorage.getItem(preferenceKey) !== 'false';
 
+    function applyEnabledState(nextEnabled, persist = false) {
+        isEnabled = !!nextEnabled;
+        if (persist) {
+            localStorage.setItem(preferenceKey, String(isEnabled));
+        }
+        if (toggle) {
+            toggle.checked = isEnabled;
+        }
+    }
+
     if (toggle) {
         toggle.checked = isEnabled;
         toggle.addEventListener('change', () => {
-            isEnabled = toggle.checked;
-            localStorage.setItem(preferenceKey, String(isEnabled));
+            applyEnabledState(toggle.checked, true);
         });
     }
+
+    window.addEventListener('storage', (event) => {
+        if (event.key !== preferenceKey) return;
+        applyEnabledState(event.newValue !== 'false', false);
+    });
+
+    window.addEventListener('message', (event) => {
+        if (event.origin !== window.location.origin) return;
+        const payload = event.data;
+        if (!payload || payload.type !== 'fyrian:cursor-follower') return;
+        applyEnabledState(!!payload.enabled, true);
+    });
 
     if (isTouch || reduceMotion) return;
 

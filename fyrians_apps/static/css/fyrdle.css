@@ -1,0 +1,448 @@
+.main-content:not(.embedded) {
+    padding: 20px 16px 28px;
+}
+
+.main-content.embedded {
+    padding: 8px 10px;
+}
+
+.fyrdle-layout {
+    width: min(860px, 100%);
+    --panel-bg: linear-gradient(145deg, color-mix(in srgb, var(--surface2) 82%, #000 18%), color-mix(in srgb, var(--surface) 90%, #000 10%));
+    --panel-border: color-mix(in srgb, var(--primary) 22%, var(--border-subtle) 78%);
+    --soft-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.fyrdle-header {
+    margin-bottom: 0.2rem;
+}
+
+.fyrdle-header h1 {
+    font-size: 2.2rem;
+    margin-bottom: 0.1rem;
+}
+
+.fyrdle-header .subtitle {
+    font-size: 0.72rem;
+    letter-spacing: 5px;
+}
+
+.fyrdle-options {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.65rem;
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    background: var(--panel-bg);
+    box-shadow: var(--soft-shadow);
+}
+
+.options-left,
+.options-right {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+}
+
+.option-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.opt-label {
+    color: var(--text-mid);
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.segmented {
+    display: inline-flex;
+    background: color-mix(in srgb, var(--surface2) 86%, #000 14%);
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    padding: 2px;
+}
+
+.opt-btn,
+.guess-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.opt-btn.active,
+.guess-btn.active {
+    background: var(--primary-dim);
+    color: var(--text-active);
+}
+
+.toggle-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    padding: 6px 11px;
+    font-size: 0.78rem;
+    color: var(--text-active);
+}
+
+.toggle-chip input {
+    accent-color: var(--primary);
+}
+
+.tool-btn {
+    border: 1px solid var(--border-subtle);
+    background: color-mix(in srgb, var(--surface2) 86%, #000 14%);
+    color: var(--text-active);
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, filter 0.2s ease;
+}
+
+.tool-btn:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+    background: var(--primary-dim);
+    transform: translateY(-1px);
+    filter: brightness(1.08);
+}
+
+.opt-btn:hover,
+.guess-btn:hover,
+.primary-btn:hover,
+.toggle-chip:hover {
+    transform: translateY(-1px);
+}
+
+.fyrdle-main {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 0.7rem;
+    align-items: start;
+    border: 1px solid var(--panel-border);
+    border-radius: 14px;
+    background: var(--panel-bg);
+    box-shadow: var(--soft-shadow);
+    padding: 0.75rem;
+}
+
+.board-shell {
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--surface2) 88%, #000 12%);
+    padding: 0.62rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.keyboard-shell {
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--surface2) 88%, #000 12%);
+    padding: 0.58rem 0.5rem;
+}
+
+.status-row {
+    width: 100%;
+    min-height: 38px;
+    text-align: center;
+    margin-bottom: 0.35rem;
+}
+
+#fyrdle-status {
+    color: var(--text-active);
+    font-size: 0.95rem;
+}
+
+#fyrdle-substatus {
+    color: var(--text-mid);
+    font-size: 0.78rem;
+    margin-top: 0.18rem;
+}
+
+.fyrdle-grid {
+    width: min(310px, 100%);
+    margin: 0;
+    display: grid;
+    gap: 6px;
+}
+
+.fyrdle-row {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.fyrdle-tile {
+    aspect-ratio: 1;
+    border: 2px solid var(--border-subtle);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--text-active);
+    text-transform: uppercase;
+    transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.fyrdle-tile.filled {
+    border-color: var(--text-mid);
+}
+
+.fyrdle-tile.pop {
+    transform: scale(1.08);
+}
+
+.fyrdle-tile.correct {
+    background: #4f8a47;
+    border-color: #4f8a47;
+    color: #f5fff2;
+}
+
+.fyrdle-tile.present {
+    background: #b18f3c;
+    border-color: #b18f3c;
+    color: #fff8ea;
+}
+
+.fyrdle-tile.absent {
+    background: #4a4c50;
+    border-color: #4a4c50;
+    color: #d8d8d8;
+}
+
+.fyrdle-layout.colorblind .fyrdle-tile.correct {
+    background: #2f6ad9;
+    border-color: #2f6ad9;
+}
+
+.fyrdle-layout.colorblind .fyrdle-tile.present {
+    background: #d3832b;
+    border-color: #d3832b;
+}
+
+.fyrdle-keyboard {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 292px;
+    display: grid;
+    gap: 6px;
+}
+
+.kb-row {
+    display: grid;
+    gap: 5px;
+    justify-content: center;
+}
+
+.kb-row.row-a { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+.kb-row.row-b { grid-template-columns: repeat(9, minmax(0, 1fr)); }
+.kb-row.row-c { grid-template-columns: 54px repeat(7, minmax(0, 1fr)) 54px; }
+
+.kb-key {
+    border: none;
+    border-radius: 7px;
+    background: color-mix(in srgb, var(--surface2) 86%, #000 14%);
+    color: var(--text-active);
+    min-height: 32px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: filter 0.15s ease, background-color 0.15s ease;
+}
+
+.kb-key:hover { filter: brightness(1.12); }
+.kb-key.correct { background: #4f8a47; }
+.kb-key.present { background: #b18f3c; }
+.kb-key.absent { background: #4a4c50; }
+
+.fyrdle-layout.colorblind .kb-key.correct { background: #2f6ad9; }
+.fyrdle-layout.colorblind .kb-key.present { background: #d3832b; }
+
+.fyrdle-complete {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(3px);
+    background: rgba(20, 24, 28, 0.6);
+    border-radius: 14px;
+    z-index: 10;
+}
+
+.complete-card {
+    width: min(440px, calc(100% - 24px));
+    border: 1px solid rgba(115, 185, 235, 0.45);
+    border-radius: 14px;
+    padding: 1rem;
+    background: radial-gradient(circle at 20% 20%, rgba(115, 185, 235, 0.16), transparent 45%), var(--panel-bg);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.38);
+    text-align: center;
+}
+
+.complete-card h2 {
+    color: var(--text-active);
+    font-size: 1.4rem;
+}
+
+.complete-card p {
+    color: var(--text-dim);
+    margin-top: 0.3rem;
+}
+
+.complete-stats {
+    margin-top: 0.8rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+}
+
+.complete-stat {
+    background: var(--bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 0.6rem;
+}
+
+.complete-stat .label {
+    display: block;
+    color: var(--text-mid);
+    font-size: 0.72rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.complete-stat .value {
+    display: block;
+    color: var(--text-active);
+    margin-top: 0.25rem;
+    font-size: 1.06rem;
+    font-weight: bold;
+}
+
+.complete-actions {
+    margin-top: 0.8rem;
+    display: flex;
+    justify-content: center;
+    gap: 0.65rem;
+}
+
+@media (max-height: 860px) {
+    .fyrdle-layout {
+        gap: 0.55rem;
+    }
+
+    .fyrdle-header h1 {
+        font-size: 1.9rem;
+    }
+
+    .fyrdle-header .subtitle {
+        font-size: 0.66rem;
+        letter-spacing: 4px;
+    }
+
+    .fyrdle-options { padding: 0.5rem; gap: 0.4rem; }
+
+    .fyrdle-main {
+        padding: 0.58rem;
+    }
+
+    .status-row {
+        min-height: 30px;
+        margin-bottom: 0.25rem;
+    }
+
+    #fyrdle-status {
+        font-size: 0.88rem;
+    }
+
+    #fyrdle-substatus {
+        font-size: 0.72rem;
+    }
+
+    .fyrdle-grid {
+        width: min(288px, 100%);
+        gap: 5px;
+    }
+
+    .fyrdle-row {
+        gap: 5px;
+    }
+
+    .fyrdle-tile {
+        font-size: 1.02rem;
+    }
+
+    .fyrdle-keyboard {
+        gap: 5px;
+    }
+
+    .kb-row {
+        gap: 4px;
+    }
+
+    .kb-key {
+        min-height: 31px;
+        font-size: 0.68rem;
+    }
+
+    .kb-row.row-c {
+        grid-template-columns: 58px repeat(7, minmax(0, 1fr)) 58px;
+    }
+}
+
+@media (max-width: 760px) {
+    .fyrdle-layout {
+        width: 100%;
+    }
+
+    .fyrdle-options {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .options-left,
+    .options-right {
+        justify-content: center;
+    }
+
+    .fyrdle-main { padding: 0.64rem; }
+    .fyrdle-main {
+        grid-template-columns: 1fr;
+    }
+
+    .keyboard-shell {
+        margin-top: 0.45rem;
+    }
+
+    .kb-key {
+        min-height: 34px;
+        font-size: 0.72rem;
+    }
+
+    .kb-row.row-c {
+        grid-template-columns: 56px repeat(7, minmax(0, 1fr)) 56px;
+    }
+}

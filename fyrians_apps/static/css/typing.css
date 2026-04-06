@@ -1,49 +1,92 @@
 .typing-layout {
-    width: 1100px;
-    max-width: 90%;
+    width: min(980px, 100%);
     margin: 0 auto;
     align-self: center;
+    --panel-bg: linear-gradient(150deg, color-mix(in srgb, var(--surface2) 82%, #000 18%), color-mix(in srgb, var(--surface) 92%, #000 8%));
+    --panel-border: color-mix(in srgb, var(--primary) 22%, var(--border-subtle) 78%);
+    --soft-shadow: 0 14px 34px rgba(0, 0, 0, 0.3);
 }
 
 .controls {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 2rem;
-    background: var(--surface2);
-    padding: 10px 20px;
-    border-radius: 8px;
-    border: 1px solid var(--border-subtle);
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    box-shadow: var(--soft-shadow);
+    padding: 0.65rem 0.75rem;
+    border-radius: 12px;
 }
 
-.settings-group { display: flex; align-items: center; gap: 15px; }
-.settings-group .label { color: var(--text-dim); }
+.settings-group {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.settings-group .label {
+    color: var(--text-mid);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+}
 
 .controls .toggle-btn,
-.controls .time-btn {
-    background: none;
-    border: none;
+.controls .time-btn,
+.controls .mode-btn {
+    background: color-mix(in srgb, var(--surface2) 86%, #000 14%);
+    border: 1px solid var(--border-subtle);
     color: var(--text-dim);
     cursor: pointer;
-    font-size: 1.1rem;
-    transition: 0.2s;
+    font-size: 0.84rem;
+    border-radius: 999px;
+    padding: 0.38rem 0.72rem;
+    transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease, filter 0.2s ease;
     outline: none;
 }
 
 .controls .toggle-btn:hover,
 .controls .toggle-btn.active,
 .controls .time-btn:hover,
-.controls .time-btn.active {
+.controls .time-btn.active,
+.controls .mode-btn:hover,
+.controls .mode-btn.active {
     color: var(--primary);
+    border-color: var(--primary);
+    transform: translateY(-1px);
+    filter: brightness(1.08);
 }
 
-#timer { font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem; }
+.test-area {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 14px;
+    box-shadow: var(--soft-shadow);
+    padding: 1rem;
+}
+
+#timer {
+    font-size: 2rem;
+    color: var(--primary);
+    margin-bottom: 0.6rem;
+    text-align: center;
+    line-height: 1;
+}
 
 .typing-container {
     position: relative;
-    font-size: 2.2rem;
-    line-height: 3.2rem;
-    height: 9.6rem;
+    font-size: 1.9rem;
+    line-height: 2.75rem;
+    height: calc((3 * 2.75rem) + 1.44rem);
     overflow: hidden;
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 0.72rem;
+    background: color-mix(in srgb, var(--surface2) 88%, #000 12%);
 }
 
 #words {
@@ -51,21 +94,29 @@
     flex-wrap: wrap;
     align-content: flex-start;
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    transition: transform 0.2s ease; 
+    top: 0.72rem;
+    left: 0.72rem;
+    width: calc(100% - 1.44rem);
+    transition: transform 0.2s ease;
 }
 
-.word { display: flex; margin: 0 0.6em 0 0; }
-.letter { transition: color 0.1s; color: var(--text-dim); }
+.word {
+    display: flex;
+    margin: 0 0.52em 0 0;
+}
+
+.letter {
+    transition: color 0.1s;
+    color: var(--text-dim);
+}
+
 .letter.correct { color: var(--text-active); }
 .letter.incorrect { color: var(--error); text-decoration: underline; }
 
 #cursor {
     position: absolute;
     width: 3px;
-    height: 2.5rem;
+    height: 1.8rem;
     background-color: var(--primary);
     border-radius: 2px;
     top: 0;
@@ -75,19 +126,103 @@
     animation: blink 1s infinite;
 }
 
-@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-
-#results {
-    margin-top: 2rem;
-    text-align: center;
-    background: var(--surface2);
-    padding: 3rem;
-    border-radius: 8px;
-    border: 1px solid var(--border-subtle);
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
 }
 
-#results h2 { color: var(--primary); margin-bottom: 1.5rem; }
-.stats-grid { display: flex; justify-content: center; gap: 2.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
-.stat-box { display: flex; flex-direction: column; }
-.stat-label { font-size: 0.9rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
-.stat-value { font-size: 2.5rem; color: var(--text-active); font-weight: bold; }
+#results {
+    margin-top: 1rem;
+    text-align: center;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    box-shadow: var(--soft-shadow);
+    padding: 1.5rem 1.1rem;
+    border-radius: 14px;
+}
+
+#results h2 {
+    color: var(--primary);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.55rem;
+    margin-bottom: 1rem;
+}
+
+.stat-box {
+    display: flex;
+    flex-direction: column;
+    background: color-mix(in srgb, var(--surface2) 82%, #000 18%);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 0.65rem 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.66rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    color: var(--text-active);
+    font-weight: bold;
+    line-height: 1.15;
+    margin-top: 0.2rem;
+}
+
+@media (max-height: 860px) {
+    .typing-container {
+        font-size: 1.65rem;
+        line-height: 2.45rem;
+        height: calc((3 * 2.45rem) + 1.44rem);
+    }
+
+    #cursor {
+        height: 1.95rem;
+    }
+
+    #timer {
+        font-size: 1.7rem;
+    }
+}
+
+@media (max-width: 900px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 680px) {
+    .typing-layout {
+        width: 100%;
+    }
+
+    .controls {
+        padding: 0.58rem;
+    }
+
+    .typing-container {
+        font-size: 1.35rem;
+        line-height: 2.1rem;
+        height: calc((3 * 2.1rem) + 1.16rem);
+        padding: 0.58rem;
+    }
+
+    #words {
+        top: 0.58rem;
+        left: 0.58rem;
+        width: calc(100% - 1.16rem);
+    }
+
+    #cursor {
+        height: 1.7rem;
+    }
+}

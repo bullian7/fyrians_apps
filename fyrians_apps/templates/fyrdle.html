@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fyrdle.css') }}">
+{% endblock %}
+
+{% block nav_back %}
+<a href="/" class="back-link">← Back to Apps</a>
+{% endblock %}
+
+{% block content %}
+<div class="fyrdle-layout" id="fyrdle-root">
+    <header class="app-header fyrdle-header">
+        <h1>Fyrdle</h1>
+        <p class="subtitle">word puzzle for the fyr crew</p>
+    </header>
+
+    <section class="fyrdle-options" aria-label="Fyrdle options">
+        <div class="options-left">
+            <div class="option-group" role="group" aria-label="Game mode">
+                <span class="opt-label">Mode</span>
+                <div class="segmented">
+                    <button class="opt-btn active" data-mode="random" type="button">Random</button>
+                    <button class="opt-btn" data-mode="daily" type="button">Daily</button>
+                </div>
+            </div>
+
+            <div class="option-group" role="group" aria-label="Guess count">
+                <span class="opt-label">Guesses</span>
+                <div class="segmented">
+                    <button class="guess-btn active" data-max-guesses="6" type="button">6</button>
+                    <button class="guess-btn" data-max-guesses="8" type="button">8</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="options-right">
+            <label class="toggle-chip" for="hard-mode-toggle">
+                <input id="hard-mode-toggle" type="checkbox">
+                <span>Hard Mode</span>
+            </label>
+
+            <label class="toggle-chip" for="colorblind-toggle">
+                <input id="colorblind-toggle" type="checkbox">
+                <span>Colorblind</span>
+            </label>
+
+            <button id="new-fyrdle-btn" class="tool-btn" type="button">New Fyrdle</button>
+        </div>
+    </section>
+
+    <section class="fyrdle-main">
+        <div class="board-shell">
+            <div class="status-row">
+                <p id="fyrdle-status">Loading dictionary...</p>
+                <p id="fyrdle-substatus"></p>
+            </div>
+
+            <div id="fyrdle-grid" class="fyrdle-grid" aria-label="Fyrdle board"></div>
+        </div>
+
+        <div class="keyboard-shell">
+            <div id="fyrdle-keyboard" class="fyrdle-keyboard" aria-label="On-screen keyboard"></div>
+        </div>
+
+        <div id="fyrdle-complete" class="fyrdle-complete hidden" aria-live="polite">
+            <div class="complete-card">
+                <h2 id="complete-title">Fyrdle Complete</h2>
+                <p id="complete-message">Great run.</p>
+                <div class="complete-stats" id="complete-stats"></div>
+                <div class="complete-actions">
+                    <button id="play-again-btn" class="primary-btn" type="button">Play Again</button>
+                    <button id="share-btn" class="tool-btn" type="button">Copy Result</button>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/fyrdle.js') }}"></script>
+{% endblock %}

@@ -1,15 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const cursorPreferenceKey = 'cursorFollowerEnabled';
     const homeShell = document.querySelector('.home-shell');
     const frameStack = document.getElementById('applet-frame-stack');
     const loadingBar = document.getElementById('applet-loading');
     const welcomePanel = document.getElementById('welcome-panel');
     const themeSelector = document.getElementById('theme-selector');
+    const cursorToggle = document.getElementById('cursor-follower-toggle');
     const title = document.getElementById('applet-title');
     const description = document.getElementById('applet-description');
     const standalone = document.getElementById('open-standalone');
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const sidebarResizer = document.getElementById('sidebar-resizer');
+    const appletSearch = document.getElementById('applet-search');
     const buttons = Array.from(document.querySelectorAll('.sidebar-app'));
+    const categories = Array.from(document.querySelectorAll('.sidebar-category'));
 
     const appletsDataEl = document.getElementById('applets-data');
     const applets = JSON.parse((appletsDataEl && appletsDataEl.textContent) || '[]');
@@ -17,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const sidebarStorageKey = 'fyrian_sidebar_collapsed';
     const sidebarWidthStorageKey = 'fyrian_sidebar_width';
+    const activeAppletStorageKey = 'fyrian_active_applet';
     const minSidebarWidth = 220;
     const maxSidebarWidth = 900;
 
@@ -63,8 +68,31 @@ document.addEventListener('DOMContentLoaded', () => {
         frameStack.querySelectorAll('iframe').forEach((iframe) => applyThemeToIframe(iframe, theme));
     }
 
+    function applyCursorFollowerToIframe(iframe, enabled) {
+        if (!iframe.contentWindow) return;
+        iframe.contentWindow.postMessage(
+            { type: 'fyrian:cursor-follower', enabled: !!enabled },
+            window.location.origin
+        );
+    }
+
+    function applyCursorFollowerToAllFrames(enabled) {
+        frameStack.querySelectorAll('iframe').forEach((iframe) => applyCursorFollowerToIframe(iframe, enabled));
+    }
+
     function getFrameForKey(key) {
         return frameStack.querySelector(`iframe[data-app-key="${key}"]`);
+    }
+
+    function focusAppletFrame(iframe) {
+        if (!iframe) return;
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+            document.activeElement.blur();
+        }
+        iframe.focus({ preventScroll: true });
+        if (iframe.contentWindow && typeof iframe.contentWindow.focus === 'function') {
+            iframe.contentWindow.focus();
+        }
     }
 
     function createFrameForApplet(appMeta) {
@@ -73,14 +101,18 @@ document.addEventListener('DOMContentLoaded', () => {
         iframe.dataset.appKey = appMeta.key;
         iframe.dataset.loaded = '0';
         iframe.title = appMeta.title;
+        iframe.tabIndex = -1;
         iframe.src = appMeta.embed;
 
         iframe.addEventListener('load', () => {
             iframe.dataset.loaded = '1';
             const currentTheme = localStorage.getItem('fyrian_theme') || 'system';
             applyThemeToIframe(iframe, currentTheme);
+            const cursorEnabled = localStorage.getItem(cursorPreferenceKey) !== 'false';
+            applyCursorFollowerToIframe(iframe, cursorEnabled);
             if (activeKey === appMeta.key) {
                 setLoading(false);
+                requestAnimationFrame(() => focusAppletFrame(iframe));
             }
         });
 
@@ -105,6 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!appMeta) return;
 
         activeKey = key;
+        localStorage.setItem(activeAppletStorageKey, key);
         if (welcomePanel) {
             welcomePanel.classList.add('hidden');
         }
@@ -125,15 +158,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         showFrame(key);
+        requestAnimationFrame(() => focusAppletFrame(frame));
+    }
+
+    function applySearchFilter() {
+        const query = (appletSearch?.value || '').trim().toLowerCase();
+
+        buttons.forEach((btn) => {
+            const appKey = btn.dataset.appKey;
+            const appMeta = APP_INFO[appKey];
+            if (!appMeta) return;
+            const haystack = `${appMeta.name} ${appMeta.title} ${appMeta.description} ${appMeta.sigil}`.toLowerCase();
+            const matches = !query || haystack.includes(query);
+            btn.classList.toggle('hidden', !matches);
+        });
+
+        categories.forEach((section) => {
+            const visibleCount = section.querySelectorAll('.sidebar-app:not(.hidden)').length;
+            section.classList.toggle('hidden', visibleCount === 0);
+        });
     }
 
     buttons.forEach((btn) => {
         btn.addEventListener('click', () => activateApplet(btn.dataset.appKey));
     });
 
+    if (appletSearch) {
+        appletSearch.addEventListener('input', applySearchFilter);
+    }
+
     if (themeSelector) {
         themeSelector.addEventListener('change', (event) => {
             applyThemeToAllFrames(event.target.value);
+        });
+    }
+
+    if (cursorToggle) {
+        cursorToggle.addEventListener('change', () => {
+            applyCursorFollowerToAllFrames(cursorToggle.checked);
         });
     }
 
@@ -200,4 +262,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     setLoading(false);
+    applySearchFilter();
+
+    const savedAppletKey = localStorage.getItem(activeAppletStorageKey);
+    if (savedAppletKey && APP_INFO[savedAppletKey]) {
+        activateApplet(savedAppletKey);
+    }
 });
