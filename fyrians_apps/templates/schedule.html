@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/schedule.css') }}">
+{% endblock %}
+
+{% block nav_back %}
+<a href="/" class="back-link">← Back to Apps</a>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <header class="app-header">
+        <h1>Schedule Optimizer</h1>
+        <p class="subtitle">branch-and-bound assignment engine</p>
+    </header>
+
+    <!-- STEP 1: Count -->
+    <div class="step" id="step-count">
+        <div class="step-label">01 — setup</div>
+        <h2>How many students?</h2>
+        <p class="hint">Each student will be assigned to one unique time slot.</p>
+        <div class="count-controls">
+            <button class="icon-btn" id="decrement">−</button>
+            <span id="count-display">3</span>
+            <button class="icon-btn" id="increment">+</button>
+        </div>
+        <button class="primary-btn" id="go-to-slots">Continue →</button>
+    </div>
+
+    <!-- STEP 2: Time Slots -->
+    <div class="step hidden" id="step-slots">
+        <div class="step-nav">
+            <button class="back-btn" id="back-to-count">← Back</button>
+            <div class="step-label">02 — time slots</div>
+        </div>
+        <h2>Enter time slots</h2>
+        <p class="hint">Pick a date and time for each slot. These are the options everyone will choose from.</p>
+        <div id="slots-list"></div>
+        <button class="primary-btn" id="go-to-students">Continue →</button>
+    </div>
+
+    <!-- STEP 3: Students -->
+    <div class="step hidden" id="step-students">
+        <div class="step-nav">
+            <button class="back-btn" id="back-to-slots">← Back</button>
+            <div class="step-label">03 — preferences</div>
+        </div>
+        <h2>Student preferences</h2>
+        <p class="hint">Enter each student's top 3 choices. Leave as "— none —" for no preference.</p>
+        <div id="students-list"></div>
+        <button class="primary-btn" id="run-optimizer">Optimize Schedule →</button>
+    </div>
+
+    <!-- STEP 4: Results -->
+    <div class="step hidden" id="step-results">
+        <div class="step-nav">
+            <button class="back-btn" id="back-to-students">← Back</button>
+            <div class="step-label">04 — results</div>
+        </div>
+        <h2>Optimal Schedule</h2>
+
+        <div class="score-banner">
+            <div class="score-main">
+                <span id="result-satisfaction">0</span><span class="pct">%</span>
+            </div>
+            <div class="score-sub">satisfaction · <span id="result-score">0</span> / <span id="result-max">0</span> pts</div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-chip" id="chip-1st">
+                <span class="chip-val" id="stat-first">0</span>
+                <span class="chip-label">1st choice</span>
+            </div>
+            <div class="stat-chip" id="chip-2nd">
+                <span class="chip-val" id="stat-second">0</span>
+                <span class="chip-label">2nd choice</span>
+            </div>
+            <div class="stat-chip" id="chip-3rd">
+                <span class="chip-val" id="stat-third">0</span>
+                <span class="chip-label">3rd choice</span>
+            </div>
+            <div class="stat-chip" id="chip-missed">
+                <span class="chip-val" id="stat-missed">0</span>
+                <span class="chip-label">missed all</span>
+            </div>
+            <div class="stat-chip">
+                <span class="chip-val" id="stat-nopref">0</span>
+                <span class="chip-label">no pref</span>
+            </div>
+        </div>
+
+        <div id="assignments-table"></div>
+
+        <div class="perf-row">
+            <span>nodes explored: <strong id="stat-nodes">0</strong></span>
+            <span>time: <strong id="stat-time">0ms</strong></span>
+        </div>
+
+        <button class="primary-btn" id="restart-btn">Start Over</button>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay hidden" id="loading">
+        <div class="spinner"></div>
+        <p>Optimizing...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/schedule.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/typing.css') }}">
+{% endblock %}
+
+{% block nav_back %}
+<a href="/" class="back-link">← Back to Apps</a>
+{% endblock %}
+
+{% block content %}
+<div class="container typing-layout">
+    <header class="app-header">
+        <h1>Fyrian Types</h1>
+    </header>
+
+    <div class="controls">
+        <div class="settings-group">
+            <span class="label">Punctuation:</span>
+            <button class="toggle-btn" id="punct-toggle">Off</button>
+        </div>
+        <div class="settings-group" id="time-selectors">
+            <span class="label">Time:</span>
+            <button class="time-btn" data-time="5">5</button>
+            <button class="time-btn" data-time="10">10</button>
+            <button class="time-btn" data-time="15">15</button>
+            <button class="time-btn active" data-time="30">30</button>
+            <button class="time-btn" data-time="60">60</button>
+        </div>
+    </div>
+
+    <div class="test-area">
+        <div id="timer">30</div>
+        <div class="typing-container">
+            <div id="cursor"></div>
+            <div id="words">
+                <div class="loading">Loading words...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="results" class="hidden">
+        <h2>Test Complete</h2>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <span class="stat-label">Net WPM</span>
+                <span class="stat-value" id="net-wpm">0</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Raw WPM</span>
+                <span class="stat-value" id="raw-wpm">0</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Accuracy</span>
+                <span class="stat-value" id="accuracy">0%</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Correct Words</span>
+                <span class="stat-value" id="correct-words">0</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Missed Words</span>
+                <span class="stat-value" id="incorrect-words">0</span>
+            </div>
+        </div>
+        <button id="restart-btn" class="primary-btn">Restart</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/typing.js') }}"></script>
+{% endblock %}

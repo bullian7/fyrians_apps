@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <header class="home-header">
+        <h1>Welcome to Fyrian's Apps</h1>
+        <p class="subtitle">Select a tool to get started</p>
+    </header>
+
+    <div class="app-grid">
+        <a href="/schedule" class="app-card">
+            <h2>Schedule Optimizer</h2>
+            <p>Branch-and-bound assignment engine to optimally assign students to available time slots based on preferences.</p>
+        </a>
+        <a href="/typing" class="app-card">
+            <h2>Fyrian Types</h2>
+            <p>A minimalist, customizable typing test designed for speed, accuracy, and performance tracking.</p>
+        </a>
+    </div>
+</div>
+{% endblock %}

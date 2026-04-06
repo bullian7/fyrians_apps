@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fyrian's Apps</title>
+    <!-- Base styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <!-- Page specific styles injected here -->
+    {% block extra_css %}{% endblock %}
+    
+    <!-- Execute theme logic early to prevent flash -->
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</head>
+<body>
+    <nav class="top-nav">
+        <a href="/" class="nav-logo">Fyrian's Apps</a>
+        <div class="nav-controls">
+            {% block nav_back %}{% endblock %}
+            <select id="theme-selector" class="theme-selector">
+                <option value="system">System</option>
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+            </select>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
