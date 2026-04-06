@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/spotify.css') }}">
+{% endblock %}
+
+{% block nav_back %}
+<a href="/" class="back-link">← Back to Apps</a>
+{% endblock %}
+
+{% block content %}
+<div class="spotify-layout">
+
+    {% if not logged_in %}
+    <!-- ── Connect Screen ── -->
+    <div class="spotify-connect">
+        <div class="connect-icon">♫</div>
+        <h1 class="connect-title">Spotify Statistics</h1>
+        <p class="connect-sub">
+            Connect your Spotify account to see your top tracks, artists, genres,
+            and recently played history across different time ranges.
+        </p>
+        <a href="/spotify/login" class="spotify-login-btn">
+            ▶ &nbsp;Connect with Spotify
+        </a>
+        <p class="connect-note">reads your listening data · never modifies anything</p>
+    </div>
+
+    {% else %}
+    <!-- ── Dashboard ── -->
+
+    <!-- Header -->
+    <div class="spotify-header">
+        <div class="spotify-header-left">
+            <h1>Spotify Statistics</h1>
+            <p class="subtitle">your listening history at a glance</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+            {% if user %}
+            <a href="{{ user.external_urls.spotify }}" target="_blank" class="spotify-user-pill">
+                {% if user.images %}
+                <img src="{{ user.images[0].url }}" alt="">
+                {% endif %}
+                <span class="pill-name">{{ user.display_name }}</span>
+                <span>· {{ user.followers.total | default(0) }} followers</span>
+            </a>
+            {% endif %}
+            <a href="/spotify/logout" class="logout-btn">disconnect</a>
+        </div>
+    </div>
+
+    <!-- Error Banner -->
+    <div id="error-banner" class="error-banner hidden"></div>
+
+    <!-- Time Range Tabs -->
+    <div class="range-tabs">
+        <button class="range-tab" data-range="short_term">4 weeks</button>
+        <button class="range-tab active" data-range="medium_term">6 months</button>
+        <button class="range-tab" data-range="long_term">all time</button>
+    </div>
+
+    <!-- Loading state -->
+    <div id="loading-state" class="loading-state">
+        <div class="spinner-sm"></div>
+        <span>loading your stats...</span>
+    </div>
+
+    <!-- Dashboard (hidden until loaded) -->
+    <div id="dashboard" style="display:none;">
+
+        <!-- Overview chips -->
+        <div class="stats-overview">
+            <div class="overview-chip">
+                <span class="chip-val" id="ov-tracks">—</span>
+                <span class="chip-label">top tracks</span>
+            </div>
+            <div class="overview-chip">
+                <span class="chip-val" id="ov-artists">—</span>
+                <span class="chip-label">top artists</span>
+            </div>
+            <div class="overview-chip">
+                <span class="chip-val" id="ov-popularity">—</span>
+                <span class="chip-label">avg popularity</span>
+            </div>
+        </div>
+
+        <!-- Tracks + Artists -->
+        <div class="spotify-columns">
+            <div class="stat-panel">
+                <div class="panel-title">top 50 tracks</div>
+                <div class="panel-scroll">
+                    <ul class="track-list" id="top-tracks-list"></ul>
+                </div>
+            </div>
+            <div class="stat-panel">
+                <div class="panel-title">top 50 artists</div>
+                <div class="panel-scroll">
+                    <ul class="artist-list" id="top-artists-list"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Genres + Recently Played -->
+        <div class="spotify-columns">
+            <div class="stat-panel">
+                <div class="panel-title">genre breakdown</div>
+                <ul class="genre-list" id="genre-list"></ul>
+            </div>
+            <div class="stat-panel" id="recent-panel">
+                <div class="panel-title">recently played · last 50</div>
+                <div class="panel-scroll">
+                    <ul class="recent-list" id="recent-list"></ul>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /dashboard -->
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if logged_in %}
+<script src="{{ url_for('static', filename='js/spotify.js') }}"></script>
+{% endif %}
+{% endblock %}
