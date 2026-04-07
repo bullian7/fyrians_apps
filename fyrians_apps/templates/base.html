@@ -13,7 +13,7 @@
     <!-- Execute theme logic early to prevent flash -->
     <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
     {% set embedded = request.args.get('embed') == '1' %}
     {% if not embedded %}
     <nav class="top-nav">
