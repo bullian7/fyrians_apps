@@ -90,6 +90,39 @@ def init_db():
             FOREIGN KEY(user_id) REFERENCES users(id)
         );
         CREATE INDEX IF NOT EXISTS idx_schedule_runs_user_time ON schedule_runs(user_id, created_at DESC);
+
+        CREATE TABLE IF NOT EXISTS reaction_tests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            played_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            reaction_ms INTEGER,
+            false_start INTEGER NOT NULL DEFAULT 0,
+            input_method TEXT NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_reaction_tests_user_time ON reaction_tests(user_id, played_at DESC);
+
+        CREATE TABLE IF NOT EXISTS quote_folders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            password_hash TEXT,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_quote_folders_user_time ON quote_folders(user_id, created_at DESC);
+
+        CREATE TABLE IF NOT EXISTS quotes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            folder_id INTEGER NOT NULL,
+            said_by TEXT NOT NULL,
+            quote_text TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(id),
+            FOREIGN KEY(folder_id) REFERENCES quote_folders(id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_quotes_folder_time ON quotes(folder_id, created_at DESC);
         """
     )
     db.commit()

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/quotebook.css') }}">
+{% endblock %}
+
+{% block nav_back %}
+<a href="/" class="back-link">← Back to Apps</a>
+{% endblock %}
+
+{% block content %}
+<div class="container quotebook-layout">
+    <header class="app-header">
+        <h1>Quote Book</h1>
+        <p class="subtitle">Save quotes by folder. Add optional folder passwords when you want privacy.</p>
+    </header>
+
+    <section class="quotebook-shell">
+        <aside class="folders-panel">
+            <h2>Folders</h2>
+            <div class="folder-create">
+                <input id="folder-name-input" type="text" placeholder="Folder name">
+                <div class="password-wrap">
+                    <input id="folder-pass-input" type="password" placeholder="Optional password lock">
+                    <button id="folder-pass-toggle" class="pass-toggle" type="button" aria-label="Show password" title="Show password"></button>
+                </div>
+                <button id="folder-create-btn" class="primary-btn" type="button">Create Folder</button>
+            </div>
+            <div id="folders-list" class="folders-list"></div>
+        </aside>
+
+        <section class="quotes-panel">
+            <div id="locked-overlay" class="locked-overlay hidden">
+                <div class="locked-card">
+                    <h3>Folder Locked</h3>
+                    <p>Enter this folder password to view and edit quotes.</p>
+                    <div class="password-wrap">
+                        <input id="unlock-password-input" type="password" placeholder="Folder password">
+                        <button id="unlock-pass-toggle" class="pass-toggle" type="button" aria-label="Show password" title="Show password"></button>
+                    </div>
+                    <button id="unlock-folder-btn" class="primary-btn" type="button">Enter Password</button>
+                </div>
+            </div>
+            <div class="quotes-top">
+                <div class="quotes-top-left">
+                    <h2 id="active-folder-title">Choose a folder</h2>
+                    <div id="folder-lock-badge" class="folder-lock-badge hidden">Locked</div>
+                </div>
+                <div class="quotes-top-right">
+                    <button id="folder-lock-btn" class="tool-btn hidden" type="button">Lock Folder</button>
+                    <button id="folder-delete-btn" class="tool-btn danger hidden" type="button">Delete Folder</button>
+                </div>
+            </div>
+
+            <div class="quote-create">
+                <input id="quote-said-by" type="text" placeholder="Who said this quote?">
+                <textarea id="quote-text" rows="3" placeholder="Quote text"></textarea>
+                <button id="quote-add-btn" class="primary-btn" type="button">Add Quote</button>
+            </div>
+
+            <div class="quote-filters">
+                <input id="quote-search" type="text" placeholder="Search by person or keywords">
+                <select id="quote-sort">
+                    <option value="newest">Sort: Newest</option>
+                    <option value="name_asc">Sort: Name A-Z</option>
+                    <option value="name_desc">Sort: Name Z-A</option>
+                </select>
+            </div>
+
+            <div id="quote-status" class="quote-status">Sign in through Account to use Quote Book.</div>
+            <div id="quotes-list" class="quotes-list"></div>
+        </section>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/quotebook.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,136 @@
+.fyrian-popup-root {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+}
+
+.fyrian-popup-root.active {
+    display: block;
+}
+
+.fyrian-popup-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(4, 8, 14, 0.62);
+    backdrop-filter: blur(2px);
+}
+
+.fyrian-popup-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(640px, calc(100vw - 2rem));
+    border-radius: 20px;
+    border: 2px solid color-mix(in srgb, var(--border-soft) 65%, #ffffff 35%);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--surface) 84%, #2a1010 16%), color-mix(in srgb, var(--surface2) 70%, #190b0b 30%));
+    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.48);
+    padding: 1.4rem 1.45rem 1.25rem;
+    color: var(--text-active);
+}
+
+.fyrian-popup-panel.danger {
+    border-color: color-mix(in srgb, #df5d5d 58%, #ffffff 42%);
+}
+
+.fyrian-popup-title {
+    margin: 0;
+    font-size: 2rem;
+    line-height: 1.12;
+    color: var(--text-active);
+}
+
+.fyrian-popup-message {
+    margin: 1rem 0 0;
+    color: var(--text-mid);
+    font-size: 1.55rem;
+    line-height: 1.3;
+    white-space: pre-wrap;
+}
+
+.fyrian-popup-input-wrap {
+    margin-top: 1rem;
+}
+
+.fyrian-popup-input {
+    width: 100%;
+    border: 1px solid var(--border-subtle);
+    background: color-mix(in srgb, var(--surface2) 84%, #000 16%);
+    color: var(--text-active);
+    border-radius: 12px;
+    padding: 0.7rem 0.85rem;
+    font-size: 1rem;
+}
+
+.fyrian-popup-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 24%, transparent 76%);
+}
+
+.fyrian-popup-actions {
+    margin-top: 1.3rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+.fyrian-popup-btn {
+    border: 0;
+    border-radius: 999px;
+    padding: 0.66rem 1.2rem;
+    min-width: 108px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.fyrian-popup-ok {
+    background: #f2b3b3;
+    color: #4b1b1b;
+}
+
+.fyrian-popup-cancel {
+    background: #8c3434;
+    color: #f2dede;
+}
+
+.fyrian-popup-btn:hover {
+    filter: brightness(1.06);
+}
+
+.fyrian-popup-btn:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--primary) 45%, #fff 55%);
+    outline-offset: 2px;
+}
+
+.fyrian-popup-hidden {
+    display: none !important;
+}
+
+@media (max-width: 760px) {
+    .fyrian-popup-panel {
+        width: min(640px, calc(100vw - 1rem));
+        border-radius: 16px;
+        padding: 1rem;
+    }
+
+    .fyrian-popup-title {
+        font-size: 1.35rem;
+    }
+
+    .fyrian-popup-message {
+        font-size: 1rem;
+        margin-top: 0.8rem;
+    }
+
+    .fyrian-popup-actions {
+        margin-top: 1rem;
+    }
+
+    .fyrian-popup-btn {
+        min-width: 92px;
+        padding: 0.6rem 0.95rem;
+    }
+}

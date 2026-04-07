@@ -6,6 +6,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from db import get_db
 
 account_bp = Blueprint('account_bp', __name__)
+MAX_REACTION_STAT_MS = 1000
 
 
 def _require_user():
@@ -173,6 +174,30 @@ def user_dashboard():
         (user_id,),
     ).fetchall()
 
+    reaction_totals = db.execute(
+        """
+        SELECT
+            COUNT(*) AS attempts,
+            SUM(CASE WHEN false_start = 1 THEN 1 ELSE 0 END) AS false_starts,
+            COUNT(CASE WHEN false_start = 0 AND reaction_ms BETWEEN 1 AND ? THEN 1 END) AS valid_tests,
+            AVG(CASE WHEN false_start = 0 AND reaction_ms BETWEEN 1 AND ? THEN reaction_ms ELSE NULL END) AS avg_ms,
+            MIN(CASE WHEN false_start = 0 AND reaction_ms BETWEEN 1 AND ? THEN reaction_ms ELSE NULL END) AS best_ms
+        FROM reaction_tests
+        WHERE user_id = ?
+        """,
+        (MAX_REACTION_STAT_MS, MAX_REACTION_STAT_MS, MAX_REACTION_STAT_MS, user_id),
+    ).fetchone()
+    reaction_recent = db.execute(
+        """
+        SELECT played_at, reaction_ms, false_start, input_method
+        FROM reaction_tests
+        WHERE user_id = ?
+        ORDER BY id DESC
+        LIMIT 8
+        """,
+        (user_id,),
+    ).fetchall()
+
     return jsonify({
         'user': {'id': user['id'], 'username': user['username']},
         'fyrdle': {
@@ -199,6 +224,14 @@ def user_dashboard():
         'schedule': {
             'runs': int(schedule_totals['runs'] or 0),
             'recent': [dict(row) for row in schedule_recent],
+        },
+        'reaction': {
+            'attempts': int(reaction_totals['attempts'] or 0),
+            'false_starts': int(reaction_totals['false_starts'] or 0),
+            'valid_tests': int(reaction_totals['valid_tests'] or 0),
+            'avg_ms': round(float(reaction_totals['avg_ms'] or 0), 2),
+            'best_ms': int(float(reaction_totals['best_ms'] or 0)),
+            'recent': [dict(row) for row in reaction_recent],
         },
     })
 

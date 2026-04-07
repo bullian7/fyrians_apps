@@ -72,6 +72,11 @@ function renderTypingStats(payload) {
         lines.push(`<div>${row.time_limit}s: ${fmt(row.avg_net_wpm, 2)} net · ${fmt(row.avg_accuracy, 1)}% acc (${row.tests} tests)</div>`);
     });
 
+    lines.push('<div class="stats-heading">Best Time</div>');
+    (payload.best_by_time || []).forEach((row) => {
+        lines.push(`<div>${row.time_limit}s: ${fmt(row.best_net_wpm, 2)} best net WPM</div>`);
+    });
+
     lines.push('<div class="stats-heading">By Difficulty</div>');
     (payload.by_mode || []).forEach((row) => {
         lines.push(`<div>${modeLabel(row.mode)}: ${fmt(row.avg_net_wpm, 2)} net · ${fmt(row.avg_accuracy, 1)}% acc (${row.tests} tests)</div>`);

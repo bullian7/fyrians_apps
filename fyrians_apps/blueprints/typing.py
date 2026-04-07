@@ -134,6 +134,19 @@ def api_typing_stats():
         (user_id,),
     ).fetchall()
 
+    best_by_time = db.execute(
+        """
+        SELECT
+            time_limit,
+            MAX(net_wpm) AS best_net_wpm
+        FROM typing_tests
+        WHERE user_id = ?
+        GROUP BY time_limit
+        ORDER BY time_limit
+        """,
+        (user_id,),
+    ).fetchall()
+
     by_mode = db.execute(
         """
         SELECT
@@ -201,6 +214,7 @@ def api_typing_stats():
             'best_net_wpm': round(float(overall['best_net_wpm'] or 0), 2),
         },
         'by_time': [dict(row) for row in by_time],
+        'best_by_time': [dict(row) for row in best_by_time],
         'by_mode': [dict(row) for row in by_mode],
         'by_punctuation': [dict(row) for row in by_punctuation],
         'by_combo': [dict(row) for row in by_combo],

@@ -30,6 +30,16 @@ APPLETS = [
         'sigil': '[TY]'
     },
     {
+        'key': 'reaction',
+        'name': 'Reaction Time Test',
+        'title': 'Reaction Time Test',
+        'category': 'games',
+        'description': 'Wait for green, then click or hit Space as fast as you can.',
+        'standalone': '/reaction',
+        'embed': '/reaction?embed=1',
+        'sigil': '[RT]'
+    },
+    {
         'key': 'spotify',
         'name': 'Spotify Statistics',
         'title': 'Spotify Statistics',
@@ -38,6 +48,16 @@ APPLETS = [
         'standalone': '/spotify',
         'embed': '/spotify?embed=1',
         'sigil': '[SP]'
+    },
+    {
+        'key': 'quotebook',
+        'name': 'Quote Book',
+        'title': 'Quote Book',
+        'category': 'other',
+        'description': 'Organize quotes into folders, optionally lock folders, and search or sort instantly.',
+        'standalone': '/quotebook',
+        'embed': '/quotebook?embed=1',
+        'sigil': '[QB]'
     },
     {
         'key': 'sudoku',

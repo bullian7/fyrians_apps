@@ -84,6 +84,49 @@
             </div>
         </div>
 
+        <!-- Account Data Upload -->
+        <div class="stat-panel account-data-panel">
+            <div class="panel-title">account data upload · past 12 months</div>
+            <p class="account-upload-help">Upload Spotify Account Data history JSON files (`Streaming_History_Audio_*.json`) to unlock deeper yearly stats.</p>
+            <div class="account-upload-row">
+                <label class="account-upload-btn" for="account-data-input">Upload History JSON</label>
+                <input id="account-data-input" class="account-file-input" type="file" accept=".json,application/json" multiple>
+                <button id="account-data-clear" class="account-clear-btn hidden" type="button">Clear Upload</button>
+            </div>
+            <p id="account-data-status" class="account-upload-status">No account data uploaded yet.</p>
+
+            <div id="account-data-results" class="stats-overview account-data-overview hidden">
+                <div class="overview-chip">
+                    <span class="chip-val" id="ad-minutes">—</span>
+                    <span class="chip-label">minutes listened</span>
+                </div>
+                <div class="overview-chip">
+                    <span class="chip-val" id="ad-streams">—</span>
+                    <span class="chip-label">streams</span>
+                </div>
+                <div class="overview-chip">
+                    <span class="chip-val" id="ad-top-track">—</span>
+                    <span class="chip-label">most played song</span>
+                </div>
+                <div class="overview-chip">
+                    <span class="chip-val" id="ad-top-artist">—</span>
+                    <span class="chip-label">most played artist</span>
+                </div>
+                <div class="overview-chip">
+                    <span class="chip-val" id="ad-unique-tracks">—</span>
+                    <span class="chip-label">unique tracks</span>
+                </div>
+                <div class="overview-chip">
+                    <span class="chip-val" id="ad-unique-artists">—</span>
+                    <span class="chip-label">unique artists</span>
+                </div>
+            </div>
+
+            <div id="account-top-tracks-wrap" class="panel-scroll account-top-tracks-wrap hidden">
+                <ul id="account-top-tracks" class="track-list"></ul>
+            </div>
+        </div>
+
         <!-- Tracks + Artists -->
         <div class="spotify-columns">
             <div class="stat-panel">

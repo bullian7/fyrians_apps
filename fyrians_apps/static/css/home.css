@@ -70,21 +70,16 @@
     margin-bottom: 0.7rem;
     padding: 0.2rem 0 0.8rem;
     border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
 }
 
 .sidebar-head-top {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-}
-
-.sidebar-head h1 {
-    color: var(--primary);
-    font-weight: bold;
-    font-size: 1.2rem;
-    letter-spacing: 1px;
-    margin-bottom: 0;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 .sidebar-head p {
@@ -93,7 +88,8 @@
 }
 
 .sidebar-search-wrap {
-    margin-top: 0.6rem;
+    margin-top: 0;
+    flex: 1;
 }
 
 .applet-search {
@@ -179,7 +175,6 @@
     color: var(--primary);
 }
 
-.home-shell.sidebar-collapsed .sidebar-head h1,
 .home-shell.sidebar-collapsed .app-name,
 .home-shell.sidebar-collapsed .sidebar-search-wrap,
 .home-shell.sidebar-collapsed .sidebar-category-title {
@@ -394,7 +389,6 @@
         min-height: 72vh;
     }
 
-    .home-shell.sidebar-collapsed .sidebar-head h1,
     .home-shell.sidebar-collapsed .app-name,
     .home-shell.sidebar-collapsed .sidebar-search-wrap,
     .home-shell.sidebar-collapsed .sidebar-category-title {
@@ -439,10 +433,6 @@
 
     .sidebar-head {
         margin-bottom: 0.25rem;
-    }
-
-    .sidebar-head h1 {
-        font-size: 1rem;
     }
 
     .sidebar-category-title {

@@ -167,10 +167,13 @@ function createList() {
     newItemTextInput.focus();
 }
 
-function deleteCurrentList() {
+async function deleteCurrentList() {
     const list = currentList();
     if (!list) return;
-    const confirmed = window.confirm(`Delete list "${list.name}" and all its items?`);
+    const confirmed = await window.FyrianPopup.confirm(
+        `Delete list "${list.name}" and all its items?`,
+        { title: 'Delete List', danger: true, okText: 'Delete' }
+    );
     if (!confirmed) return;
 
     state.lists = state.lists.filter((entry) => entry.id !== list.id);

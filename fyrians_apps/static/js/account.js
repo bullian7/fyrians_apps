@@ -9,6 +9,7 @@ const dashFyrdle = document.getElementById('dash-fyrdle');
 const dashTyping = document.getElementById('dash-typing');
 const dashSudoku = document.getElementById('dash-sudoku');
 const dashSchedule = document.getElementById('dash-schedule');
+const dashReaction = document.getElementById('dash-reaction');
 
 function setStatus(text, isError = false) {
     accountStatus.textContent = text;
@@ -77,6 +78,16 @@ function renderDashboard(data) {
         <div>Saved runs: <strong>${data.schedule.runs}</strong></div>
         <div>Recent:</div>
         ${(data.schedule.recent || []).slice(0, 3).map((r) => `<div>• ${esc(r.label || `${r.num_students} students`)} (#${r.id})</div>`).join('') || '<div>• No saved runs yet</div>'}
+    `;
+
+    dashReaction.innerHTML = `
+        <div>Attempts: <strong>${data.reaction.attempts}</strong></div>
+        <div>Valid tests: <strong>${data.reaction.valid_tests}</strong></div>
+        <div>False starts: <strong>${data.reaction.false_starts}</strong></div>
+        <div>Avg reaction: <strong>${data.reaction.avg_ms ? `${data.reaction.avg_ms}ms` : '--'}</strong></div>
+        <div>Best reaction: <strong>${data.reaction.best_ms ? `${data.reaction.best_ms}ms` : '--'}</strong></div>
+        <div>Recent:</div>
+        ${(data.reaction.recent || []).slice(0, 3).map((r) => `<div>• ${r.false_start ? 'False start' : `${r.reaction_ms}ms`} (${esc(r.input_method)})</div>`).join('') || '<div>• No attempts yet</div>'}
     `;
 }
 

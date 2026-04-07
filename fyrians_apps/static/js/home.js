@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const welcomePanel = document.getElementById('welcome-panel');
     const themeSelector = document.getElementById('theme-selector');
     const cursorToggle = document.getElementById('cursor-follower-toggle');
+    const navHomeLink = document.querySelector('.nav-logo');
     const title = document.getElementById('applet-title');
     const description = document.getElementById('applet-description');
     const standalone = document.getElementById('open-standalone');
@@ -21,9 +22,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const sidebarStorageKey = 'fyrian_sidebar_collapsed';
     const sidebarWidthStorageKey = 'fyrian_sidebar_width';
-    const activeAppletStorageKey = 'fyrian_active_applet';
+    const activeAppletSessionKey = 'fyrian_active_applet';
     const minSidebarWidth = 220;
     const maxSidebarWidth = 900;
+    const defaultTitle = title ? title.textContent : "Welcome to Fyrian's Apps";
+    const defaultDescription = description
+        ? description.textContent
+        : 'A one-stop hub for the tools I built for my family members and friends. Pick any applet from the left to get started.';
 
     let activeKey = null;
     let isDragging = false;
@@ -137,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!appMeta) return;
 
         activeKey = key;
-        localStorage.setItem(activeAppletStorageKey, key);
+        sessionStorage.setItem(activeAppletSessionKey, key);
         if (welcomePanel) {
             welcomePanel.classList.add('hidden');
         }
@@ -161,6 +166,28 @@ document.addEventListener('DOMContentLoaded', () => {
         requestAnimationFrame(() => focusAppletFrame(frame));
     }
 
+    function activateHome() {
+        activeKey = null;
+        sessionStorage.removeItem(activeAppletSessionKey);
+        activateButtonUI(null);
+        showFrame(null);
+        setLoading(false);
+
+        if (welcomePanel) {
+            welcomePanel.classList.remove('hidden');
+        }
+        if (title) {
+            title.textContent = defaultTitle;
+        }
+        if (description) {
+            description.textContent = defaultDescription;
+        }
+        if (standalone) {
+            standalone.href = '#';
+            standalone.classList.add('hidden-link');
+        }
+    }
+
     function applySearchFilter() {
         const query = (appletSearch?.value || '').trim().toLowerCase();
 
@@ -182,6 +209,15 @@ document.addEventListener('DOMContentLoaded', () => {
     buttons.forEach((btn) => {
         btn.addEventListener('click', () => activateApplet(btn.dataset.appKey));
     });
+    if (navHomeLink) {
+        navHomeLink.addEventListener('click', (event) => {
+            if (event.defaultPrevented) return;
+            if (event.button !== 0) return;
+            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+            event.preventDefault();
+            activateHome();
+        });
+    }
 
     if (appletSearch) {
         appletSearch.addEventListener('input', applySearchFilter);
@@ -264,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setLoading(false);
     applySearchFilter();
 
-    const savedAppletKey = localStorage.getItem(activeAppletStorageKey);
+    const savedAppletKey = sessionStorage.getItem(activeAppletSessionKey);
     if (savedAppletKey && APP_INFO[savedAppletKey]) {
         activateApplet(savedAppletKey);
     }

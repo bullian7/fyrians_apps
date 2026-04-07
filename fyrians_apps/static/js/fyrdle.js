@@ -541,10 +541,13 @@ function removeLetter() {
     renderBoard();
 }
 
-function confirmNewGameIfNeeded() {
+async function confirmNewGameIfNeeded() {
     if (gameComplete) return true;
     if (currentRow === 0 && currentGuess.length === 0) return true;
-    return window.confirm('Start a new Fyrdle and clear the current board?');
+    return window.FyrianPopup.confirm(
+        'Start a new Fyrdle and clear the current board?',
+        { title: 'New Fyrdle', okText: 'Start' }
+    );
 }
 
 function resetStateForNewGame() {
@@ -620,9 +623,9 @@ function attachEvents() {
     });
 
     modeButtons.forEach((btn) => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
             if (btn.dataset.mode === settings.mode) return;
-            if (!confirmNewGameIfNeeded()) return;
+            if (!(await confirmNewGameIfNeeded())) return;
 
             settings.mode = btn.dataset.mode;
             persistSettings();
@@ -632,10 +635,10 @@ function attachEvents() {
     });
 
     guessButtons.forEach((btn) => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
             const nextGuesses = Number(btn.dataset.maxGuesses);
             if (nextGuesses === settings.maxGuesses) return;
-            if (!confirmNewGameIfNeeded()) return;
+            if (!(await confirmNewGameIfNeeded())) return;
 
             settings.maxGuesses = nextGuesses === 8 ? 8 : 6;
             persistSettings();
@@ -644,9 +647,9 @@ function attachEvents() {
         });
     });
 
-    hardModeToggle.addEventListener('change', () => {
+    hardModeToggle.addEventListener('change', async () => {
         if (hardModeToggle.checked === settings.hardMode) return;
-        if (!confirmNewGameIfNeeded()) {
+        if (!(await confirmNewGameIfNeeded())) {
             hardModeToggle.checked = settings.hardMode;
             return;
         }
@@ -663,8 +666,8 @@ function attachEvents() {
         updateOptionUI();
     });
 
-    newGameBtn.addEventListener('click', () => {
-        if (!confirmNewGameIfNeeded()) return;
+    newGameBtn.addEventListener('click', async () => {
+        if (!(await confirmNewGameIfNeeded())) return;
         startNewGame();
     });
 

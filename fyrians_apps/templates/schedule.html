@@ -22,10 +22,16 @@
         <p class="hint">Each student will be assigned to one unique time slot.</p>
         <div class="saved-runs-box">
             <div class="saved-row">
-                <select id="saved-run-select">
-                    <option value="">Saved schedules (sign in to use)</option>
-                </select>
-                <button class="back-btn" id="load-saved-run">Load Saved</button>
+                <div class="saved-picker">
+                    <button class="saved-run-trigger" id="saved-run-trigger" type="button" aria-haspopup="dialog" aria-expanded="false">
+                        Saved schedules (sign in to use)
+                    </button>
+                    <div id="saved-run-popup" class="saved-run-popup hidden" role="dialog" aria-label="Saved schedules">
+                        <div class="saved-run-popup-head">Saved schedules</div>
+                        <div id="saved-run-list" class="saved-run-list"></div>
+                    </div>
+                </div>
+                <button class="back-btn" id="load-saved-run" disabled>Load Selected</button>
                 <button class="back-btn hidden" id="undo-load-run">Undo Load</button>
                 <button class="back-btn" id="schedule-stats-toggle">My Stats</button>
             </div>

@@ -275,3 +275,25 @@ def api_schedule_stats():
         },
         'recent': recent,
     })
+
+
+@schedule_bp.route('/api/schedule/run/<int:run_id>', methods=['DELETE'])
+def api_delete_schedule_run(run_id):
+    user = g.get('current_user')
+    if not user:
+        return jsonify({'error': 'Sign in required'}), 401
+
+    db = get_db()
+    found = db.execute(
+        "SELECT id FROM schedule_runs WHERE id = ? AND user_id = ?",
+        (run_id, user['id']),
+    ).fetchone()
+    if not found:
+        return jsonify({'error': 'Saved schedule not found'}), 404
+
+    db.execute(
+        "DELETE FROM schedule_runs WHERE id = ? AND user_id = ?",
+        (run_id, user['id']),
+    )
+    db.commit()
+    return jsonify({'ok': True})

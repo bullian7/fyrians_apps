@@ -6,9 +6,13 @@ let savedStudents = [];
 let lastResult = null;
 let currentStepId = 'step-count';
 let preLoadSnapshot = null;
+let savedRuns = [];
+let selectedSavedRunId = 0;
 
 const countDisplay = document.getElementById('count-display');
-const savedRunSelect = document.getElementById('saved-run-select');
+const savedRunTrigger = document.getElementById('saved-run-trigger');
+const savedRunPopup = document.getElementById('saved-run-popup');
+const savedRunList = document.getElementById('saved-run-list');
 const savedRunStatus = document.getElementById('saved-run-status');
 const undoLoadBtn = document.getElementById('undo-load-run');
 const loadSavedBtn = document.getElementById('load-saved-run');
@@ -129,14 +133,17 @@ document.getElementById('run-optimizer').addEventListener('click', async () => {
         });
         const data = await res.json();
         document.getElementById('loading').classList.add('hidden');
-        if (data.error) return alert('Error: ' + data.error);
+        if (data.error) {
+            await window.FyrianPopup.alert('Error: ' + data.error, { title: 'Schedule Optimizer' });
+            return;
+        }
         lastResult = data;
         renderResults(data);
         await saveCurrentRun(students, data);
         showStep('step-results');
     } catch (err) {
         document.getElementById('loading').classList.add('hidden');
-        alert('Request failed: ' + err.message);
+        await window.FyrianPopup.alert('Request failed: ' + err.message, { title: 'Schedule Optimizer' });
     }
 });
 
@@ -217,37 +224,99 @@ function formatRunOption(run) {
     return `${label} · ${dateText}`;
 }
 
+function closeSavedPopup() {
+    savedRunPopup.classList.add('hidden');
+    savedRunTrigger.setAttribute('aria-expanded', 'false');
+}
+
+function openSavedPopup() {
+    savedRunPopup.classList.remove('hidden');
+    savedRunTrigger.setAttribute('aria-expanded', 'true');
+}
+
+function renderSavedRunList() {
+    savedRunList.innerHTML = '';
+    if (!savedRuns.length) {
+        const empty = document.createElement('div');
+        empty.className = 'saved-run-empty';
+        empty.textContent = 'No saved schedules yet.';
+        savedRunList.appendChild(empty);
+        return;
+    }
+
+    savedRuns.forEach((run) => {
+        const created = new Date(run.created_at.replace(' ', 'T'));
+        const dateText = Number.isNaN(created.getTime()) ? run.created_at : created.toLocaleString();
+        const label = run.label ? run.label : `${run.num_students} students`;
+        const row = document.createElement('div');
+        row.className = `saved-run-item${selectedSavedRunId === run.id ? ' is-selected' : ''}`;
+        row.dataset.runId = String(run.id);
+        const meta = document.createElement('div');
+        meta.className = 'saved-run-meta';
+        const title = document.createElement('div');
+        title.className = 'saved-run-title';
+        title.textContent = label;
+        const date = document.createElement('div');
+        date.className = 'saved-run-date';
+        date.textContent = dateText;
+        meta.appendChild(title);
+        meta.appendChild(date);
+
+        const selectBtn = document.createElement('button');
+        selectBtn.type = 'button';
+        selectBtn.className = 'saved-run-action select';
+        selectBtn.dataset.action = 'select';
+        selectBtn.textContent = 'Select';
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'saved-run-action delete';
+        deleteBtn.dataset.action = 'delete';
+        deleteBtn.textContent = 'Delete';
+
+        row.appendChild(meta);
+        row.appendChild(selectBtn);
+        row.appendChild(deleteBtn);
+        savedRunList.appendChild(row);
+    });
+}
+
+function refreshSavedRunTrigger() {
+    const selected = savedRuns.find((run) => run.id === selectedSavedRunId);
+    if (selected) {
+        savedRunTrigger.textContent = formatRunOption(selected);
+        return;
+    }
+    savedRunTrigger.textContent = savedRuns.length ? 'Choose saved schedule...' : 'No saved schedules yet';
+}
+
 async function loadSavedRuns() {
     try {
         const res = await fetch('/api/schedule/history');
         const data = await res.json();
-        const runs = Array.isArray(data.runs) ? data.runs : [];
-        savedRunSelect.innerHTML = '';
+        savedRuns = Array.isArray(data.runs) ? data.runs : [];
+        if (selectedSavedRunId && !savedRuns.some((run) => run.id === selectedSavedRunId)) {
+            selectedSavedRunId = 0;
+        }
 
-        const placeholder = document.createElement('option');
-        placeholder.value = '';
-        placeholder.textContent = runs.length ? 'Choose saved schedule...' : 'No saved schedules yet';
-        savedRunSelect.appendChild(placeholder);
-
-        runs.forEach((run) => {
-            const option = document.createElement('option');
-            option.value = String(run.id);
-            option.textContent = formatRunOption(run);
-            savedRunSelect.appendChild(option);
-        });
-
-        loadSavedBtn.disabled = runs.length === 0;
-        if (!runs.length) {
-            savedRunSelect.value = '';
+        renderSavedRunList();
+        refreshSavedRunTrigger();
+        loadSavedBtn.disabled = !selectedSavedRunId;
+        if (!savedRuns.length) {
             preLoadSnapshot = null;
             undoLoadBtn.classList.add('hidden');
+            closeSavedPopup();
         }
         setSavedStatus(
-            runs.length
+            savedRuns.length
                 ? 'Load a previous schedule, make edits, and rerun.'
                 : 'No saved schedules yet. Click Continue to start a new schedule.'
         );
     } catch (_err) {
+        savedRuns = [];
+        selectedSavedRunId = 0;
+        renderSavedRunList();
+        refreshSavedRunTrigger();
         loadSavedBtn.disabled = true;
         setSavedStatus('Could not load saved schedules right now.');
     }
@@ -333,7 +402,7 @@ async function saveCurrentRun(students, result) {
 }
 
 document.getElementById('load-saved-run').addEventListener('click', async () => {
-    const selectedId = Number(savedRunSelect.value);
+    const selectedId = Number(selectedSavedRunId);
     if (!selectedId) {
         setSavedStatus('Choose a saved schedule first.');
         return;
@@ -354,12 +423,62 @@ document.getElementById('load-saved-run').addEventListener('click', async () => 
     }
 });
 
-savedRunSelect.addEventListener('change', () => {
-    const hasSelection = Number(savedRunSelect.value) > 0;
-    loadSavedBtn.disabled = !hasSelection;
-    if (!hasSelection) {
-        setSavedStatus('Click Continue to start a new schedule, or choose a saved run.');
+savedRunTrigger.addEventListener('click', () => {
+    const isOpen = !savedRunPopup.classList.contains('hidden');
+    if (isOpen) {
+        closeSavedPopup();
+    } else {
+        openSavedPopup();
     }
+});
+
+savedRunList.addEventListener('click', async (event) => {
+    const actionEl = event.target.closest('button[data-action]');
+    if (!actionEl) return;
+    const row = actionEl.closest('.saved-run-item');
+    const runId = Number(row?.dataset.runId || 0);
+    if (!runId) return;
+
+    if (actionEl.dataset.action === 'select') {
+        selectedSavedRunId = runId;
+        renderSavedRunList();
+        refreshSavedRunTrigger();
+        loadSavedBtn.disabled = false;
+        closeSavedPopup();
+        setSavedStatus('Saved schedule selected. Click Load Selected to apply it.');
+        return;
+    }
+
+    const yes = await window.FyrianPopup.confirm('Delete this saved schedule?', {
+        title: 'Schedule Optimizer',
+        okText: 'Delete',
+        cancelText: 'Cancel',
+        danger: true
+    });
+    if (!yes) return;
+
+    try {
+        const response = await fetch(`/api/schedule/run/${runId}`, { method: 'DELETE' });
+        const payload = await response.json();
+        if (!response.ok) {
+            setSavedStatus(payload.error || 'Could not delete that saved schedule.');
+            return;
+        }
+        if (selectedSavedRunId === runId) {
+            selectedSavedRunId = 0;
+            loadSavedBtn.disabled = true;
+        }
+        setSavedStatus('Saved schedule deleted.');
+        await loadSavedRuns();
+    } catch (_err) {
+        setSavedStatus('Could not delete that saved schedule.');
+    }
+});
+
+document.addEventListener('click', (event) => {
+    if (savedRunPopup.classList.contains('hidden')) return;
+    if (savedRunPopup.contains(event.target) || savedRunTrigger.contains(event.target)) return;
+    closeSavedPopup();
 });
 
 undoLoadBtn.addEventListener('click', () => {

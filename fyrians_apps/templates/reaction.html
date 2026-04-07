@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reaction.css') }}">
+{% endblock %}
+
+{% block nav_back %}
+<a href="/" class="back-link">← Back to Apps</a>
+{% endblock %}
+
+{% block content %}
+<div class="container reaction-layout">
+    <header class="app-header">
+        <h1>Reaction Time Test</h1>
+        <p class="subtitle">Wait for green, then click or press Space as fast as possible.</p>
+    </header>
+
+    <div class="reaction-controls">
+        <button id="reaction-stats-toggle" class="tool-btn" type="button">My Stats</button>
+    </div>
+
+    <div id="reaction-stats-panel" class="reaction-stats-panel hidden">
+        <div id="reaction-stats-content" class="reaction-stats-content"></div>
+    </div>
+
+    <button id="reaction-zone" class="reaction-zone blue-state" type="button" aria-live="polite">
+        <span id="reaction-main-text">Press Start</span>
+        <span id="reaction-sub-text">The panel stays blue first, then flips green after a random 2-4 seconds.</span>
+    </button>
+
+    <div class="reaction-results">
+        <div class="reaction-result-card">
+            <span class="label">Last Result</span>
+            <span id="reaction-last-ms" class="value">-- ms</span>
+        </div>
+        <div class="reaction-result-card">
+            <span class="label">Session Best</span>
+            <span id="reaction-best-ms" class="value">-- ms</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/reaction.js') }}"></script>
+{% endblock %}

@@ -654,9 +654,12 @@ async function generatePuzzleStart() {
     }
 }
 
-function maybeGeneratePuzzle(force = false) {
+async function maybeGeneratePuzzle(force = false) {
     if (!force && puzzleActive && !puzzleSolved) {
-        const confirmed = window.confirm('Generate a new puzzle and abandon the current run?');
+        const confirmed = await window.FyrianPopup.confirm(
+            'Generate a new puzzle and abandon the current run?',
+            { title: 'Sudoku Lab', okText: 'Generate' }
+        );
         if (!confirmed) return;
     }
 
@@ -665,14 +668,17 @@ function maybeGeneratePuzzle(force = false) {
     generatePuzzleStart();
 }
 
-function handleDifficultyClick(btn) {
+async function handleDifficultyClick(btn) {
     const nextDifficulty = btn.dataset.difficulty;
     if (!nextDifficulty || nextDifficulty === currentDifficulty) return;
 
     const previousDifficulty = currentDifficulty;
 
     if (puzzleActive && !puzzleSolved) {
-        const confirmed = window.confirm('Switch difficulty and generate a new puzzle now?');
+        const confirmed = await window.FyrianPopup.confirm(
+            'Switch difficulty and generate a new puzzle now?',
+            { title: 'Sudoku Lab', okText: 'Switch' }
+        );
         if (!confirmed) return;
 
         currentDifficulty = nextDifficulty;

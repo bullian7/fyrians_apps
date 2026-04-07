@@ -6,6 +6,7 @@
     <title>Fyrian's Apps</title>
     <!-- Base styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/popups.css') }}">
     <!-- Page specific styles injected here -->
     {% block extra_css %}{% endblock %}
     
@@ -57,6 +58,7 @@
     {% endif %}
 
     <script src="{{ url_for('static', filename='js/cursor-slash.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/popups.js') }}"></script>
     <script src="{{ url_for('static', filename='js/base-ui.js') }}"></script>
     {% block extra_js %}{% endblock %}
 </body>

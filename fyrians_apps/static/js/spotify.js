@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loadRange(currentRange);
         });
     });
+    setupAccountDataUpload();
     loadRange(currentRange);
 });
 
@@ -181,6 +182,232 @@ function renderRecent(items) {
     }).join('');
 }
 
+// ── Account Data Upload (Past 12 Months) ────────────────────────
+function setupAccountDataUpload() {
+    const input = document.getElementById('account-data-input');
+    const clearBtn = document.getElementById('account-data-clear');
+    if (!input || !clearBtn) return;
+
+    input.addEventListener('change', async () => {
+        const files = Array.from(input.files || []);
+        if (!files.length) return;
+
+        setAccountStatus('Parsing account data...');
+        try {
+            const entries = [];
+            for (const file of files) {
+                const text = await file.text();
+                let parsed;
+                try {
+                    parsed = JSON.parse(text);
+                } catch {
+                    throw new Error(`"${file.name}" is not valid JSON.`);
+                }
+                entries.push(...normalizeHistoryEntries(parsed));
+            }
+
+            if (!entries.length) {
+                throw new Error('No streaming history rows found. Upload a Streaming_History_Audio JSON file.');
+            }
+
+            const stats = buildPastYearStats(entries);
+            renderAccountDataStats(stats);
+            clearBtn.classList.remove('hidden');
+            setAccountStatus(
+                `Loaded ${files.length} file${files.length === 1 ? '' : 's'} · ` +
+                `${formatNum(stats.totalStreams)} plays in the past 12 months.`
+            );
+        } catch (err) {
+            resetAccountDataUI();
+            setAccountStatus(err.message || 'Failed to read account data.');
+            if (window.FyrianPopup) {
+                await window.FyrianPopup.alert(err.message || 'Failed to read account data.', { title: 'Spotify Account Data' });
+            }
+        } finally {
+            input.value = '';
+        }
+    });
+
+    clearBtn.addEventListener('click', () => {
+        resetAccountDataUI();
+        clearBtn.classList.add('hidden');
+    });
+}
+
+function normalizeHistoryEntries(payload) {
+    const rows = Array.isArray(payload) ? payload : (Array.isArray(payload?.items) ? payload.items : []);
+    return rows
+        .map((row) => {
+            const ts = parseHistoryTimestamp(row);
+            if (!Number.isFinite(ts)) return null;
+
+            const trackName = String(
+                row?.master_metadata_track_name ??
+                row?.trackName ??
+                row?.track_name ??
+                row?.spotify_track_name ??
+                ''
+            ).trim();
+
+            const artistName = String(
+                row?.master_metadata_album_artist_name ??
+                row?.artistName ??
+                row?.artist_name ??
+                row?.spotify_artist_name ??
+                ''
+            ).trim();
+
+            if (!trackName && !artistName) return null;
+
+            const msRaw = Number(row?.ms_played ?? row?.msPlayed ?? 0);
+            const msPlayed = Number.isFinite(msRaw) && msRaw > 0 ? msRaw : 0;
+
+            return {
+                ts,
+                trackName: trackName || 'Unknown Track',
+                artistName: artistName || 'Unknown Artist',
+                msPlayed
+            };
+        })
+        .filter(Boolean);
+}
+
+function parseHistoryTimestamp(row) {
+    const raw = row?.ts ?? row?.played_at ?? row?.endTime ?? row?.end_time ?? row?.timestamp;
+    if (raw == null) return NaN;
+
+    if (typeof raw === 'number') {
+        return raw > 1e12 ? raw : raw * 1000;
+    }
+
+    const text = String(raw).trim();
+    if (!text) return NaN;
+
+    if (/^\d+$/.test(text)) {
+        const numeric = Number(text);
+        return numeric > 1e12 ? numeric : numeric * 1000;
+    }
+
+    let normalized = text;
+    if (normalized.includes(' ') && !normalized.includes('T')) {
+        normalized = normalized.replace(' ', 'T');
+    }
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(normalized)) {
+        normalized += ':00';
+    }
+
+    const parsed = Date.parse(normalized);
+    return Number.isFinite(parsed) ? parsed : NaN;
+}
+
+function buildPastYearStats(entries) {
+    const now = Date.now();
+    const cutoff = now - (365 * 24 * 60 * 60 * 1000);
+    const yearRows = entries.filter((row) => row.ts >= cutoff && row.ts <= (now + 60000));
+
+    const trackMap = new Map();
+    const artistMap = new Map();
+    const daySet = new Set();
+
+    let totalMs = 0;
+    for (const row of yearRows) {
+        totalMs += row.msPlayed;
+
+        const dayKey = new Date(row.ts).toISOString().slice(0, 10);
+        daySet.add(dayKey);
+
+        const trackKey = `${row.trackName}|||${row.artistName}`;
+        const t = trackMap.get(trackKey) || {
+            trackName: row.trackName,
+            artistName: row.artistName,
+            plays: 0,
+            msPlayed: 0
+        };
+        t.plays += 1;
+        t.msPlayed += row.msPlayed;
+        trackMap.set(trackKey, t);
+
+        const a = artistMap.get(row.artistName) || { artistName: row.artistName, plays: 0, msPlayed: 0 };
+        a.plays += 1;
+        a.msPlayed += row.msPlayed;
+        artistMap.set(row.artistName, a);
+    }
+
+    const topTracks = Array.from(trackMap.values()).sort((a, b) => (
+        b.plays - a.plays || b.msPlayed - a.msPlayed || a.trackName.localeCompare(b.trackName)
+    ));
+    const topArtists = Array.from(artistMap.values()).sort((a, b) => (
+        b.plays - a.plays || b.msPlayed - a.msPlayed || a.artistName.localeCompare(b.artistName)
+    ));
+
+    return {
+        totalStreams: yearRows.length,
+        totalMs,
+        totalMinutes: Math.round(totalMs / 60000),
+        uniqueTracks: trackMap.size,
+        uniqueArtists: artistMap.size,
+        activeDays: daySet.size,
+        topTrack: topTracks[0] || null,
+        topArtist: topArtists[0] || null,
+        topTracks: topTracks.slice(0, 12)
+    };
+}
+
+function renderAccountDataStats(stats) {
+    const hasData = stats.totalStreams > 0;
+    document.getElementById('account-data-results').classList.toggle('hidden', !hasData);
+    document.getElementById('account-top-tracks-wrap').classList.toggle('hidden', !hasData);
+
+    document.getElementById('ad-minutes').textContent = hasData ? formatNum(stats.totalMinutes) : '—';
+    document.getElementById('ad-streams').textContent = hasData ? formatNum(stats.totalStreams) : '—';
+    document.getElementById('ad-unique-tracks').textContent = hasData ? formatNum(stats.uniqueTracks) : '—';
+    document.getElementById('ad-unique-artists').textContent = hasData ? formatNum(stats.uniqueArtists) : '—';
+    document.getElementById('ad-top-track').textContent = hasData && stats.topTrack
+        ? `${stats.topTrack.trackName} (${formatNum(stats.topTrack.plays)}x)`
+        : '—';
+    document.getElementById('ad-top-artist').textContent = hasData && stats.topArtist
+        ? `${stats.topArtist.artistName} (${formatNum(stats.topArtist.plays)}x)`
+        : '—';
+
+    const topList = document.getElementById('account-top-tracks');
+    if (!hasData) {
+        topList.innerHTML = '';
+        return;
+    }
+
+    topList.innerHTML = stats.topTracks.map((item, i) => `
+        <li class="track-item">
+            <span class="track-rank">${i + 1}</span>
+            <div class="track-art-placeholder">♪</div>
+            <div class="track-info">
+                <div class="track-name" title="${escHtml(item.trackName)}">${escHtml(item.trackName)}</div>
+                <div class="track-artist" title="${escHtml(item.artistName)}">${escHtml(item.artistName)}</div>
+            </div>
+            <span class="track-duration">${formatNum(item.plays)}x</span>
+        </li>
+    `).join('');
+}
+
+function resetAccountDataUI() {
+    document.getElementById('account-data-results').classList.add('hidden');
+    document.getElementById('account-top-tracks-wrap').classList.add('hidden');
+    document.getElementById('account-top-tracks').innerHTML = '';
+    document.getElementById('ad-minutes').textContent = '—';
+    document.getElementById('ad-streams').textContent = '—';
+    document.getElementById('ad-top-track').textContent = '—';
+    document.getElementById('ad-top-artist').textContent = '—';
+    document.getElementById('ad-unique-tracks').textContent = '—';
+    document.getElementById('ad-unique-artists').textContent = '—';
+    setAccountStatus('No account data uploaded yet.');
+}
+
+function setAccountStatus(text) {
+    const statusEl = document.getElementById('account-data-status');
+    if (statusEl) {
+        statusEl.textContent = text;
+    }
+}
+
 // ── UI Helpers ────────────────────────────────────────────────────
 function showLoading(on) {
     document.getElementById('loading-state').style.display = on ? 'flex' : 'none';
@@ -217,6 +444,10 @@ function timeAgo(iso) {
     const h = Math.floor(m / 60);
     if (h < 24) return `${h}h ago`;
     return `${Math.floor(h / 24)}d ago`;
+}
+
+function formatNum(value) {
+    return Number(value || 0).toLocaleString();
 }
 
 function escHtml(str) {
