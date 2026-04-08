@@ -1,0 +1,117 @@
+.workout-layout {
+    width: min(1200px, 100%);
+    --panel-bg: linear-gradient(150deg, color-mix(in srgb, var(--surface2) 82%, #000 18%), color-mix(in srgb, var(--surface) 92%, #000 8%));
+    --panel-border: color-mix(in srgb, var(--primary) 22%, var(--border-subtle) 78%);
+    --soft-shadow: 0 14px 34px rgba(0, 0, 0, 0.3);
+}
+
+.workout-shell {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 14px;
+    box-shadow: var(--soft-shadow);
+    padding: 0.9rem;
+    display: grid;
+    gap: 0.75rem;
+}
+
+.workout-top {
+    display: flex;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+}
+
+.tool-btn {
+    border: 1px solid var(--border-subtle);
+    background: color-mix(in srgb, var(--surface2) 86%, #000 14%);
+    color: var(--text-active);
+    border-radius: 8px;
+    padding: 0.52rem 0.72rem;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+
+.tool-btn.danger {
+    border-color: rgba(202, 71, 84, 0.45);
+    color: var(--error);
+}
+
+.planner-status {
+    color: var(--text-dim);
+    font-size: 0.82rem;
+}
+
+.planner-wrap {
+    overflow: auto;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+}
+
+.planner-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 980px;
+    background: color-mix(in srgb, var(--surface2) 84%, #000 16%);
+}
+
+.planner-table th {
+    background: color-mix(in srgb, var(--surface2) 88%, #000 12%);
+    color: var(--text-mid);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.7rem;
+    padding: 0.58rem 0.45rem;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.planner-table td {
+    padding: 0.45rem;
+    border-top: 1px solid var(--border-subtle);
+    vertical-align: top;
+}
+
+.week-col {
+    min-width: 88px;
+}
+
+.action-col {
+    min-width: 86px;
+}
+
+.week-label {
+    color: var(--primary);
+    font-size: 0.85rem;
+    margin-top: 0.38rem;
+    text-align: center;
+}
+
+.day-input {
+    width: 100%;
+    min-height: 86px;
+    resize: vertical;
+    border: 1px solid var(--border-subtle);
+    background: color-mix(in srgb, var(--surface2) 86%, #000 14%);
+    color: var(--text-active);
+    border-radius: 8px;
+    padding: 0.42rem 0.5rem;
+    font-size: 0.82rem;
+    line-height: 1.35;
+    white-space: pre-wrap;
+}
+
+.row-del-btn {
+    width: 100%;
+    border: 1px solid rgba(202, 71, 84, 0.45);
+    background: rgba(202, 71, 84, 0.12);
+    color: var(--error);
+    border-radius: 8px;
+    padding: 0.4rem 0.45rem;
+    font-size: 0.76rem;
+    cursor: pointer;
+}
+
+@media (max-width: 760px) {
+    .workout-shell {
+        padding: 0.65rem;
+    }
+}

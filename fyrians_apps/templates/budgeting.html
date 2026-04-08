@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/budgeting.css') }}">
+{% endblock %}
+
+{% block nav_back %}
+<a href="/" class="back-link">← Back to Apps</a>
+{% endblock %}
+
+{% block content %}
+<div class="container budgeting-layout">
+    <header class="app-header">
+        <h1>Budgeting Planner</h1>
+        <p class="subtitle">Track spending, set category budgets, and stay ahead each month.</p>
+    </header>
+
+    <section class="budgeting-shell">
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <label for="month-picker">Month</label>
+                <input id="month-picker" type="month">
+                <button id="export-csv-btn" class="tool-btn" type="button">Export CSV</button>
+                <button id="clear-month-btn" class="tool-btn danger" type="button">Clear Month</button>
+            </div>
+            <div class="toolbar-right">
+                <input id="tx-search" type="text" placeholder="Search notes/categories">
+                <select id="tx-type-filter">
+                    <option value="all">All Types</option>
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                </select>
+                <select id="tx-category-filter">
+                    <option value="all">All Categories</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="summary-grid">
+            <article class="summary-card">
+                <span class="label">Income</span>
+                <span class="value income" id="sum-income">$0.00</span>
+            </article>
+            <article class="summary-card">
+                <span class="label">Expenses</span>
+                <span class="value expense" id="sum-expense">$0.00</span>
+            </article>
+            <article class="summary-card">
+                <span class="label">Net</span>
+                <span class="value net" id="sum-net">$0.00</span>
+            </article>
+            <article class="summary-card">
+                <span class="label">Savings Rate</span>
+                <span class="value" id="sum-rate">0%</span>
+            </article>
+        </div>
+
+        <div class="layout-grid">
+            <aside class="left-col">
+                <article class="panel">
+                    <h2>Add Transaction</h2>
+                    <div class="tx-form">
+                        <select id="tx-type">
+                            <option value="expense">Expense</option>
+                            <option value="income">Income</option>
+                        </select>
+                        <input id="tx-amount" type="number" step="0.01" min="0" placeholder="Amount">
+                        <input id="tx-date" type="date">
+                        <input id="tx-category" type="text" placeholder="Category (e.g. groceries)">
+                        <input id="tx-note" type="text" placeholder="Optional note">
+                        <button id="add-tx-btn" class="primary-btn" type="button">Add Transaction</button>
+                    </div>
+                </article>
+
+                <article class="panel">
+                    <h2>Category Budgets</h2>
+                    <div class="budget-form">
+                        <input id="budget-category" type="text" placeholder="Category">
+                        <input id="budget-limit" type="number" step="0.01" min="0" placeholder="Monthly limit">
+                        <button id="set-budget-btn" class="primary-btn" type="button">Set Budget</button>
+                    </div>
+                    <div id="budget-status" class="status-text">Set spending limits by category for this month.</div>
+                    <div id="budget-list" class="budget-list"></div>
+                </article>
+            </aside>
+
+            <section class="right-col">
+                <article class="panel">
+                    <h2>Insights</h2>
+                    <div id="insights" class="insights"></div>
+                </article>
+
+                <article class="panel">
+                    <h2>Transactions</h2>
+                    <div id="tx-status" class="status-text">No transactions yet for this month.</div>
+                    <div class="tx-table-wrap">
+                        <table class="tx-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Category</th>
+                                    <th>Note</th>
+                                    <th class="num">Amount</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tx-body"></tbody>
+                        </table>
+                    </div>
+                </article>
+            </section>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/budgeting.js') }}"></script>
+{% endblock %}

@@ -57,6 +57,17 @@
                 <div id="dash-reaction" class="dash-stats"></div>
             </article>
         </div>
+
+        <div class="profile-tools">
+            <h3>Profile Backup</h3>
+            <p>Export and import local app data (settings, favorites, local applet saves) as one JSON file.</p>
+            <div class="profile-tools-actions">
+                <button id="profile-export-btn" class="primary-btn" type="button">Export Local Backup</button>
+                <button id="profile-import-btn" class="tool-btn" type="button">Import Backup</button>
+                <input id="profile-import-file" type="file" accept=".json,application/json" class="hidden">
+            </div>
+            <div id="profile-backup-status" class="account-status"></div>
+        </div>
     </section>
 </div>
 {% endblock %}

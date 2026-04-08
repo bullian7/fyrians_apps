@@ -1,4 +1,5 @@
 import json
+import re
 
 from flask import Blueprint, g, jsonify, render_template, request, session
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -7,6 +8,7 @@ from db import get_db
 
 account_bp = Blueprint('account_bp', __name__)
 MAX_REACTION_STAT_MS = 1000
+ACCENT_HEX_RE = re.compile(r'^#[0-9a-fA-F]{6}$')
 
 
 def _require_user():
@@ -25,7 +27,14 @@ def auth_me():
     user = g.get('current_user')
     if not user:
         return jsonify({'logged_in': False, 'user': None})
-    return jsonify({'logged_in': True, 'user': {'id': user['id'], 'username': user['username']}})
+    return jsonify({
+        'logged_in': True,
+        'user': {
+            'id': user['id'],
+            'username': user['username'],
+            'accent_color': user.get('accent_color')
+        }
+    })
 
 
 @account_bp.route('/api/auth/register', methods=['POST'])
@@ -49,9 +58,9 @@ def auth_register():
     except Exception:
         return jsonify({'error': 'That name is already taken.'}), 409
 
-    row = db.execute('SELECT id, username FROM users WHERE username = ? COLLATE NOCASE', (username,)).fetchone()
+    row = db.execute('SELECT id, username, accent_color FROM users WHERE username = ? COLLATE NOCASE', (username,)).fetchone()
     session['user_id'] = row['id']
-    return jsonify({'ok': True, 'user': {'id': row['id'], 'username': row['username']}})
+    return jsonify({'ok': True, 'user': {'id': row['id'], 'username': row['username'], 'accent_color': row['accent_color']}})
 
 
 @account_bp.route('/api/auth/login', methods=['POST'])
@@ -61,20 +70,56 @@ def auth_login():
     passcode = str(payload.get('passcode', ''))
 
     row = get_db().execute(
-        'SELECT id, username, passcode_hash FROM users WHERE username = ? COLLATE NOCASE',
+        'SELECT id, username, passcode_hash, accent_color FROM users WHERE username = ? COLLATE NOCASE',
         (username,),
     ).fetchone()
     if not row or not check_password_hash(row['passcode_hash'], passcode):
         return jsonify({'error': 'Invalid name or passcode.'}), 401
 
     session['user_id'] = row['id']
-    return jsonify({'ok': True, 'user': {'id': row['id'], 'username': row['username']}})
+    return jsonify({'ok': True, 'user': {'id': row['id'], 'username': row['username'], 'accent_color': row['accent_color']}})
 
 
 @account_bp.route('/api/auth/logout', methods=['POST'])
 def auth_logout():
     session.pop('user_id', None)
     return jsonify({'ok': True})
+
+
+@account_bp.route('/api/user/preferences')
+def user_preferences():
+    user, err = _require_user()
+    if err:
+        return err
+    return jsonify({
+        'accent_color': user.get('accent_color')
+    })
+
+
+@account_bp.route('/api/user/preferences', methods=['PUT'])
+def user_preferences_update():
+    user, err = _require_user()
+    if err:
+        return err
+
+    payload = request.get_json(silent=True) or {}
+    accent_color = payload.get('accent_color')
+    if accent_color is None or accent_color == '':
+        accent_color = None
+    else:
+        accent_color = str(accent_color).strip()
+        if not ACCENT_HEX_RE.fullmatch(accent_color):
+            return jsonify({'error': 'Accent color must be a hex value like #73b9eb.'}), 400
+        accent_color = accent_color.lower()
+
+    db = get_db()
+    db.execute(
+        "UPDATE users SET accent_color = ? WHERE id = ?",
+        (accent_color, user['id']),
+    )
+    db.commit()
+    g.current_user['accent_color'] = accent_color
+    return jsonify({'ok': True, 'accent_color': accent_color})
 
 
 @account_bp.route('/api/user/dashboard')

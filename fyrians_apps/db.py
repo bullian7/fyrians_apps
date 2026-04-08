@@ -33,7 +33,8 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL UNIQUE COLLATE NOCASE,
             passcode_hash TEXT NOT NULL,
-            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            accent_color TEXT
         );
 
         CREATE TABLE IF NOT EXISTS fyrdle_games (
@@ -123,8 +124,23 @@ def init_db():
             FOREIGN KEY(folder_id) REFERENCES quote_folders(id)
         );
         CREATE INDEX IF NOT EXISTS idx_quotes_folder_time ON quotes(folder_id, created_at DESC);
+
+        CREATE TABLE IF NOT EXISTS basic_notes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            title TEXT NOT NULL,
+            body TEXT NOT NULL,
+            password_hash TEXT,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_basic_notes_user_time ON basic_notes(user_id, updated_at DESC);
         """
     )
+    user_columns = {row['name'] for row in db.execute("PRAGMA table_info(users)").fetchall()}
+    if 'accent_color' not in user_columns:
+        db.execute("ALTER TABLE users ADD COLUMN accent_color TEXT")
     db.commit()
 
 
@@ -135,7 +151,7 @@ def load_current_user():
         return
 
     row = get_db().execute(
-        'SELECT id, username, created_at FROM users WHERE id = ?',
+        'SELECT id, username, created_at, accent_color FROM users WHERE id = ?',
         (user_id,),
     ).fetchone()
     g.current_user = dict(row) if row else None

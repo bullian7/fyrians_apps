@@ -89,6 +89,31 @@
     font-size: 0.82rem;
 }
 
+.profile-tools {
+    margin-top: 0.9rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 0.8rem;
+    background: color-mix(in srgb, var(--surface2) 84%, #000 16%);
+    display: grid;
+    gap: 0.45rem;
+}
+
+.profile-tools h3 {
+    color: var(--text-active);
+}
+
+.profile-tools p {
+    color: var(--text-dim);
+    font-size: 0.82rem;
+}
+
+.profile-tools-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+}
+
 .tool-btn {
     border: 1px solid var(--border-subtle);
     background: color-mix(in srgb, var(--surface2) 86%, #000 14%);

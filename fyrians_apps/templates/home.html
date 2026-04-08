@@ -9,51 +9,34 @@
 
 {% block content %}
 <div class="home-shell">
-    <aside class="app-sidebar" aria-label="Applets">
-        <div class="sidebar-head">
-            <div class="sidebar-head-top">
-                <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-expanded="true" aria-label="Collapse sidebar">⇤</button>
-            </div>
-            <div class="sidebar-search-wrap">
+    <section class="home-stage">
+        <header class="home-header">
+            <h1>Fyrian's Apps</h1>
+            <p>Choose an applet to open fullscreen.</p>
+            <div class="home-search-wrap">
                 <input id="applet-search" class="applet-search" type="text" placeholder="Search applets..." aria-label="Search applets">
             </div>
-        </div>
-        <div id="sidebar-categories" class="sidebar-categories">
+        </header>
+
+        <div class="category-sections">
+            <section id="favorites-section" class="favorites-section hidden">
+                <h2 class="category-title">Favorites</h2>
+                <div id="favorites-grid" class="bubble-grid"></div>
+            </section>
             {% for category_key, category_label in [('productivity', 'Productivity'), ('other', 'Other'), ('games', 'Games')] %}
-            <section class="sidebar-category" data-category="{{ category_key }}">
-                <h2 class="sidebar-category-title">{{ category_label }}</h2>
-                {% for app in applets if app.category == category_key %}
-                <button
-                    class="sidebar-app"
-                    data-app-key="{{ app.key }}"
-                    data-app-url="{{ app.embed }}"
-                    data-app-category="{{ app.category }}"
-                >
-                    <span class="app-sigil">{{ app.sigil }}</span>
-                    <span class="app-line"></span>
-                    <span class="app-name">{{ app.name }}</span>
-                </button>
-                {% endfor %}
+            <section class="category-section" data-category="{{ category_key }}">
+                <h2 class="category-title">{{ category_label }}</h2>
+                <div class="bubble-grid">
+                    {% for app in applets if app.category == category_key %}
+                    <div class="applet-bubble" data-app-key="{{ app.key }}" role="button" tabindex="0" aria-label="Open {{ app.name }}">
+                        <button class="bubble-pin" type="button" data-pin-btn="1" aria-label="Pin {{ app.name }}">☆</button>
+                        <span class="bubble-circle">{{ app.sigil }}</span>
+                        <span class="bubble-name">{{ app.name }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
             </section>
             {% endfor %}
-        </div>
-    </aside>
-    <div id="sidebar-resizer" class="sidebar-resizer" role="separator" aria-label="Resize sidebar" aria-orientation="vertical" aria-valuemin="220" aria-valuemax="900"></div>
-
-    <section class="applet-panel">
-        <div class="applet-header">
-            <h2 id="applet-title">Welcome to Fyrian's Apps</h2>
-            <p id="applet-description">A one-stop hub for the tools I built for my family members and friends. Pick any applet from the left to get started.</p>
-            <a id="open-standalone" class="standalone-link hidden-link" href="#" target="_blank" rel="noopener noreferrer">Open Standalone</a>
-        </div>
-
-        <div class="applet-frame-wrap" id="applet-frame-wrap">
-            <div id="applet-loading" class="applet-loading" aria-hidden="true"></div>
-            <div id="welcome-panel" class="welcome-panel">
-                <h3>Built for the people I care about</h3>
-                <p>These applets are designed to be practical, friendly, and fast for everyday use. Choose one from the sidebar and your workspace will load here.</p>
-            </div>
-            <div id="applet-frame-stack" class="applet-frame-stack"></div>
         </div>
     </section>
 </div>

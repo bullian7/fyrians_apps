@@ -10,10 +10,20 @@ const dashTyping = document.getElementById('dash-typing');
 const dashSudoku = document.getElementById('dash-sudoku');
 const dashSchedule = document.getElementById('dash-schedule');
 const dashReaction = document.getElementById('dash-reaction');
+const profileExportBtn = document.getElementById('profile-export-btn');
+const profileImportBtn = document.getElementById('profile-import-btn');
+const profileImportFile = document.getElementById('profile-import-file');
+const profileBackupStatus = document.getElementById('profile-backup-status');
 
 function setStatus(text, isError = false) {
     accountStatus.textContent = text;
     accountStatus.classList.toggle('error', isError);
+}
+
+function setBackupStatus(text, isError = false) {
+    if (!profileBackupStatus) return;
+    profileBackupStatus.textContent = text;
+    profileBackupStatus.classList.toggle('error', isError);
 }
 
 async function postJSON(url, payload) {
@@ -114,6 +124,79 @@ async function refreshAuthState() {
     await loadDashboard();
 }
 
+function buildLocalBackup() {
+    const local = {};
+    for (let i = 0; i < localStorage.length; i += 1) {
+        const key = localStorage.key(i);
+        if (!key) continue;
+        local[key] = localStorage.getItem(key);
+    }
+    return {
+        version: 1,
+        exported_at: new Date().toISOString(),
+        source: 'fyrians_apps',
+        local_storage: local
+    };
+}
+
+function downloadBackupFile() {
+    const payload = buildLocalBackup();
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const href = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0, 19).replaceAll(':', '-');
+    a.href = href;
+    a.download = `fyrians-backup-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(href);
+    setBackupStatus('Backup exported.');
+}
+
+async function confirmImportBackup() {
+    if (window.FyrianPopup && typeof window.FyrianPopup.confirm === 'function') {
+        return window.FyrianPopup.confirm('Importing will replace local app data for this browser. Continue?', {
+            title: 'Import Backup',
+            okText: 'Import',
+            cancelText: 'Cancel',
+            danger: true
+        });
+    }
+    return window.confirm('Importing will replace local app data for this browser. Continue?');
+}
+
+async function importBackupFile(file) {
+    if (!file) return;
+    const raw = await file.text();
+    let parsed;
+    try {
+        parsed = JSON.parse(raw);
+    } catch (_err) {
+        setBackupStatus('Invalid JSON backup file.', true);
+        return;
+    }
+
+    if (!parsed || parsed.version !== 1 || typeof parsed.local_storage !== 'object' || parsed.local_storage === null) {
+        setBackupStatus('Backup format is not supported.', true);
+        return;
+    }
+
+    const proceed = await confirmImportBackup();
+    if (!proceed) return;
+
+    try {
+        localStorage.clear();
+        Object.entries(parsed.local_storage).forEach(([key, value]) => {
+            localStorage.setItem(String(key), String(value ?? ''));
+        });
+        setBackupStatus('Backup imported. Reloading...');
+        window.setTimeout(() => window.location.reload(), 500);
+    } catch (_err) {
+        setBackupStatus('Import failed. Storage may be full or blocked.', true);
+    }
+}
+
 document.getElementById('account-login-btn').addEventListener('click', async () => {
     const username = nameInput.value.trim();
     const passcode = passcodeInput.value;
@@ -154,5 +237,20 @@ document.getElementById('account-logout-btn').addEventListener('click', async ()
     authSection.classList.remove('hidden');
     dashboardSection.classList.add('hidden');
 });
+
+if (profileExportBtn) {
+    profileExportBtn.addEventListener('click', downloadBackupFile);
+}
+
+if (profileImportBtn && profileImportFile) {
+    profileImportBtn.addEventListener('click', () => {
+        profileImportFile.click();
+    });
+    profileImportFile.addEventListener('change', async () => {
+        const file = profileImportFile.files && profileImportFile.files[0];
+        await importBackupFile(file);
+        profileImportFile.value = '';
+    });
+}
 
 refreshAuthState().catch((err) => setStatus(err.message, true));

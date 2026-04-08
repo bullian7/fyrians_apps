@@ -26,15 +26,34 @@
             <div class="settings-wrap">
                 <button id="settings-toggle" class="settings-btn" type="button" aria-expanded="false" aria-controls="settings-menu">Settings</button>
                 <div id="settings-menu" class="settings-menu hidden" role="menu" aria-label="Settings menu">
-                    <label class="cursor-toggle" for="cursor-follower-toggle">
-                        <input type="checkbox" id="cursor-follower-toggle" checked>
-                        <span>Cursor Follower</span>
-                    </label>
-                    <select id="theme-selector" class="theme-selector">
-                        <option value="system">System</option>
-                        <option value="dark">Dark</option>
-                        <option value="light">Light</option>
-                    </select>
+                    <div class="settings-item">
+                        <label class="cursor-toggle" for="cursor-follower-toggle">
+                            <input type="checkbox" id="cursor-follower-toggle" checked>
+                            <span>Cursor Follower</span>
+                        </label>
+                    </div>
+                    <div class="settings-item">
+                        <label class="settings-item-label" for="theme-selector">Theme</label>
+                        <select id="theme-selector" class="theme-selector">
+                            <option value="system">System</option>
+                            <option value="dark">Dark</option>
+                            <option value="light">Light</option>
+                        </select>
+                    </div>
+                    <div class="settings-item accent-control">
+                        <label class="settings-item-label" for="accent-color-picker">Accent Color</label>
+                        <div class="accent-row">
+                            <input id="accent-color-picker" type="color" value="#73b9eb">
+                            <button id="accent-revert-btn" class="settings-mini-btn" type="button">Revert</button>
+                        </div>
+                    </div>
+                    <div class="settings-item audio-volume-control">
+                        <label class="settings-item-label" for="global-audio-volume">App Volume</label>
+                        <div class="audio-volume-row">
+                            <input id="global-audio-volume" type="range" min="0" max="100" value="70">
+                            <span id="global-audio-volume-label">70%</span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <a href="/account" class="account-link">
@@ -55,11 +74,24 @@
     <footer class="site-footer">
         Fyrian's Apps · personal applet collection
     </footer>
+
+    <div id="command-palette" class="command-palette hidden" role="dialog" aria-modal="true" aria-label="Command palette">
+        <div class="command-palette-backdrop" data-cmd-close="1"></div>
+        <div class="command-palette-card">
+            <div class="command-palette-input-wrap">
+                <input id="command-palette-input" type="text" placeholder="Type an app or action..." autocomplete="off">
+                <span class="command-palette-hint">Cmd/Ctrl+K</span>
+            </div>
+            <div id="command-palette-list" class="command-palette-list"></div>
+        </div>
+    </div>
     {% endif %}
 
     <script src="{{ url_for('static', filename='js/cursor-slash.js') }}"></script>
     <script src="{{ url_for('static', filename='js/popups.js') }}"></script>
     <script src="{{ url_for('static', filename='js/base-ui.js') }}"></script>
+    <script id="global-applets-data" type="application/json">{{ applets | tojson }}</script>
+    <script src="{{ url_for('static', filename='js/command-palette.js') }}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

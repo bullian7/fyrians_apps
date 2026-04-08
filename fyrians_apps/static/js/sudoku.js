@@ -8,6 +8,8 @@ const DIFFICULTY_CLUES = {
 };
 
 const STATS_KEY = 'sudoku_stats_v1';
+const STATE_KEY = 'sudoku_active_state_v1';
+const MAX_UNDO_STEPS = 200;
 
 let currentDifficulty = 'easy';
 let solutionBoard = emptyBoard();
@@ -23,12 +25,15 @@ let timerStartMs = 0;
 let timerIntervalId = null;
 let elapsedSeconds = 0;
 let lastCompletionSnapshot = null;
+let undoStack = [];
 
 const boardEl = document.getElementById('sudoku-board');
 const statusTextEl = document.getElementById('status-text');
 const mistakeTextEl = document.getElementById('mistake-text');
 const timerTextEl = document.getElementById('timer-text');
 const notesToggleEl = document.getElementById('notes-toggle');
+const undoMoveBtnEl = document.getElementById('undo-move-btn');
+const checkPuzzleBtnEl = document.getElementById('check-puzzle-btn');
 const newGameBtnEl = document.getElementById('new-game-btn');
 const clearBoardBtnEl = document.getElementById('clear-board-btn');
 const completionEl = document.getElementById('sudoku-complete');
@@ -55,6 +60,126 @@ function emptyNotesBoard() {
     return Array.from({ length: SIZE }, () =>
         Array.from({ length: SIZE }, () => new Set())
     );
+}
+
+function notesBoardToArrays(board) {
+    return board.map((row) => row.map((set) => Array.from(set).sort((a, b) => a - b)));
+}
+
+function notesArraysToBoard(data) {
+    if (!Array.isArray(data) || data.length !== SIZE) return emptyNotesBoard();
+    return data.map((row) => {
+        if (!Array.isArray(row) || row.length !== SIZE) {
+            return Array.from({ length: SIZE }, () => new Set());
+        }
+        return row.map((cell) => new Set(Array.isArray(cell) ? cell.filter((n) => Number.isInteger(n) && n >= 1 && n <= 9) : []));
+    });
+}
+
+function cloneUndoState() {
+    return {
+        userBoard: deepCopy(userBoard),
+        notesBoard: notesBoard.map((row) => row.map((set) => new Set(set))),
+        selectedCell: selectedCell ? { ...selectedCell } : null
+    };
+}
+
+function pushUndoState() {
+    if (!puzzleActive || puzzleSolved) return;
+    undoStack.push(cloneUndoState());
+    if (undoStack.length > MAX_UNDO_STEPS) {
+        undoStack.shift();
+    }
+    updateUndoButtonState();
+}
+
+function updateUndoButtonState() {
+    if (!undoMoveBtnEl) return;
+    undoMoveBtnEl.disabled = !puzzleActive || puzzleSolved || undoStack.length === 0;
+}
+
+function saveActiveState() {
+    try {
+        const payload = {
+            version: 1,
+            currentDifficulty,
+            solutionBoard,
+            puzzleBoard,
+            userBoard,
+            notesBoard: notesBoardToArrays(notesBoard),
+            selectedCell,
+            notesMode,
+            puzzleActive,
+            puzzleSolved,
+            elapsedSeconds,
+            savedAtMs: Date.now()
+        };
+        localStorage.setItem(STATE_KEY, JSON.stringify(payload));
+    } catch (_err) {
+        // ignore storage errors
+    }
+}
+
+function clearActiveState() {
+    localStorage.removeItem(STATE_KEY);
+}
+
+function restoreActiveState() {
+    try {
+        const raw = localStorage.getItem(STATE_KEY);
+        if (!raw) return false;
+        const data = JSON.parse(raw);
+        if (!data || data.version !== 1) return false;
+
+        const requiredBoards = [data.solutionBoard, data.puzzleBoard, data.userBoard];
+        const looksValid = requiredBoards.every((b) => Array.isArray(b) && b.length === SIZE && b.every((row) => Array.isArray(row) && row.length === SIZE));
+        if (!looksValid) return false;
+
+        currentDifficulty = DIFFICULTY_CLUES[data.currentDifficulty] ? data.currentDifficulty : 'easy';
+        setDifficultyUI();
+        solutionBoard = data.solutionBoard.map((row) => row.map((n) => Number(n) || 0));
+        puzzleBoard = data.puzzleBoard.map((row) => row.map((n) => Number(n) || 0));
+        userBoard = data.userBoard.map((row) => row.map((n) => Number(n) || 0));
+        notesBoard = notesArraysToBoard(data.notesBoard);
+        selectedCell = data.selectedCell && Number.isInteger(data.selectedCell.row) && Number.isInteger(data.selectedCell.col)
+            ? { row: data.selectedCell.row, col: data.selectedCell.col }
+            : null;
+        notesMode = !!data.notesMode;
+        puzzleActive = !!data.puzzleActive;
+        puzzleSolved = !!data.puzzleSolved;
+        completionEl.classList.add('hidden');
+
+        notesToggleEl.classList.toggle('active', notesMode);
+        notesToggleEl.setAttribute('aria-pressed', notesMode ? 'true' : 'false');
+        notesToggleEl.textContent = `Notes: ${notesMode ? 'On' : 'Off'}`;
+
+        undoStack = [];
+        setButtonsEnabled(puzzleActive && !puzzleSolved);
+        updateUndoButtonState();
+        renderBoard();
+
+        if (puzzleActive && !puzzleSolved) {
+            const baseElapsed = Number(data.elapsedSeconds) || 0;
+            const savedAt = Number(data.savedAtMs) || Date.now();
+            const delta = Math.max(0, Math.floor((Date.now() - savedAt) / 1000));
+            elapsedSeconds = baseElapsed + delta;
+            timerTextEl.textContent = `Time: ${formatTime(elapsedSeconds)}`;
+            startTimer(elapsedSeconds);
+            statusTextEl.textContent = `Restored ${currentDifficulty} puzzle in progress.`;
+        } else if (puzzleSolved) {
+            stopTimer();
+            statusTextEl.textContent = `Restored solved ${currentDifficulty} puzzle. Generate when ready.`;
+            setButtonsEnabled(false);
+        } else {
+            stopTimer();
+            statusTextEl.textContent = `Difficulty set to ${currentDifficulty}. Click Generate Puzzle.`;
+            setButtonsEnabled(false);
+        }
+
+        return true;
+    } catch (_err) {
+        return false;
+    }
 }
 
 function formatTime(totalSeconds) {
@@ -303,15 +428,16 @@ if (sudokuWorker) {
     });
 }
 
-function startTimer() {
+function startTimer(initialElapsed = 0) {
     stopTimer();
-    timerStartMs = Date.now();
-    elapsedSeconds = 0;
-    timerTextEl.textContent = 'Time: 00:00';
+    elapsedSeconds = Math.max(0, Number(initialElapsed) || 0);
+    timerStartMs = Date.now() - (elapsedSeconds * 1000);
+    timerTextEl.textContent = `Time: ${formatTime(elapsedSeconds)}`;
 
     timerIntervalId = window.setInterval(() => {
         elapsedSeconds = Math.floor((Date.now() - timerStartMs) / 1000);
         timerTextEl.textContent = `Time: ${formatTime(elapsedSeconds)}`;
+        saveActiveState();
     }, 1000);
 }
 
@@ -327,6 +453,8 @@ function setButtonsEnabled(enabled) {
         btn.disabled = !enabled;
     });
     notesToggleEl.disabled = !enabled;
+    undoMoveBtnEl.disabled = !enabled;
+    checkPuzzleBtnEl.disabled = !enabled;
     clearBoardBtnEl.disabled = !enabled;
 }
 
@@ -495,8 +623,10 @@ function finalizeSolve() {
     timerTextEl.textContent = `Time: ${formatTime(elapsedSeconds)}`;
 
     setButtonsEnabled(false);
+    updateUndoButtonState();
     newGameBtnEl.textContent = 'Generate Puzzle';
     showCompletion(stats, elapsedSeconds, conflicts);
+    saveActiveState();
 }
 
 function renderBoard() {
@@ -517,6 +647,7 @@ function renderBoard() {
     const conflicts = getConflictCount();
     mistakeTextEl.textContent = `Conflicts: ${conflicts}`;
     updateKeypadState();
+    updateUndoButtonState();
 
     if (isSolved()) {
         finalizeSolve();
@@ -555,10 +686,32 @@ function toggleNote(value) {
 
     const { row, col } = selectedCell;
     if (puzzleBoard[row][col] !== 0) return;
+    pushUndoState();
 
     const notes = notesBoard[row][col];
     if (notes.has(value)) notes.delete(value);
     else notes.add(value);
+    saveActiveState();
+}
+
+function clearPeerNotesForValue(targetRow, targetCol, value) {
+    if (value < 1 || value > 9) return;
+
+    // Same row and same column
+    for (let i = 0; i < SIZE; i += 1) {
+        if (i !== targetCol) notesBoard[targetRow][i].delete(value);
+        if (i !== targetRow) notesBoard[i][targetCol].delete(value);
+    }
+
+    // Same 3x3 box
+    const boxRow = Math.floor(targetRow / BOX) * BOX;
+    const boxCol = Math.floor(targetCol / BOX) * BOX;
+    for (let row = boxRow; row < boxRow + BOX; row += 1) {
+        for (let col = boxCol; col < boxCol + BOX; col += 1) {
+            if (row === targetRow && col === targetCol) continue;
+            notesBoard[row][col].delete(value);
+        }
+    }
 }
 
 function setCellValue(value) {
@@ -566,12 +719,14 @@ function setCellValue(value) {
 
     const { row, col } = selectedCell;
     if (puzzleBoard[row][col] !== 0) return;
+    pushUndoState();
 
     if (value === 0) {
         userBoard[row][col] = 0;
         notesBoard[row][col].clear();
         statusTextEl.textContent = 'Entry removed';
         renderBoard();
+        saveActiveState();
         return;
     }
 
@@ -581,10 +736,12 @@ function setCellValue(value) {
     } else {
         userBoard[row][col] = value;
         notesBoard[row][col].clear();
+        clearPeerNotesForValue(row, col, value);
         statusTextEl.textContent = `Placed ${value}`;
     }
 
     renderBoard();
+    saveActiveState();
 }
 
 function toggleNotesMode() {
@@ -595,14 +752,55 @@ function toggleNotesMode() {
     notesToggleEl.setAttribute('aria-pressed', notesMode ? 'true' : 'false');
     notesToggleEl.textContent = `Notes: ${notesMode ? 'On' : 'Off'}`;
     statusTextEl.textContent = notesMode ? 'Notes mode enabled' : 'Notes mode disabled';
+    saveActiveState();
 }
 
 function clearEntries() {
     if (!puzzleActive || puzzleSolved) return;
+    pushUndoState();
 
     userBoard = deepCopy(puzzleBoard);
     notesBoard = emptyNotesBoard();
     statusTextEl.textContent = 'Your entries were cleared';
+    renderBoard();
+    saveActiveState();
+}
+
+function undoMove() {
+    if (!puzzleActive || puzzleSolved || undoStack.length === 0) return;
+    const previous = undoStack.pop();
+    userBoard = deepCopy(previous.userBoard);
+    notesBoard = previous.notesBoard.map((row) => row.map((set) => new Set(set)));
+    selectedCell = previous.selectedCell ? { ...previous.selectedCell } : null;
+    statusTextEl.textContent = 'Undo applied.';
+    renderBoard();
+    saveActiveState();
+}
+
+function checkPuzzleNow() {
+    if (!puzzleActive || puzzleSolved) return;
+
+    let wrong = 0;
+    let filled = 0;
+    for (let row = 0; row < SIZE; row += 1) {
+        for (let col = 0; col < SIZE; col += 1) {
+            const value = userBoard[row][col];
+            if (value !== 0) {
+                filled += 1;
+                if (value !== solutionBoard[row][col]) wrong += 1;
+            }
+        }
+    }
+
+    if (wrong > 0) {
+        statusTextEl.textContent = `${wrong} incorrect entr${wrong === 1 ? 'y' : 'ies'} found.`;
+    } else if (filled < SIZE * SIZE) {
+        statusTextEl.textContent = `Looks good so far. ${SIZE * SIZE - filled} cells remaining.`;
+    } else {
+        statusTextEl.textContent = 'Everything checks out. Puzzle complete.';
+        if (isSolved()) finalizeSolve();
+    }
+
     renderBoard();
 }
 
@@ -634,6 +832,7 @@ async function generatePuzzleStart() {
         solutionBoard = generated.solution;
         userBoard = deepCopy(puzzleBoard);
         notesBoard = emptyNotesBoard();
+        undoStack = [];
 
         puzzleActive = true;
         puzzleSolved = false;
@@ -643,12 +842,14 @@ async function generatePuzzleStart() {
         newGameBtnEl.textContent = 'Generate Puzzle';
         setButtonsEnabled(true);
         renderBoard();
+        saveActiveState();
     } catch (err) {
         statusTextEl.textContent = `Generation failed: ${err.message}`;
         puzzleActive = false;
         puzzleSolved = false;
         setButtonsEnabled(false);
         renderBoard();
+        clearActiveState();
     } finally {
         isGenerating = false;
     }
@@ -665,6 +866,7 @@ async function maybeGeneratePuzzle(force = false) {
 
     recordAbandonIfNeeded();
     stopTimer();
+    clearActiveState();
     generatePuzzleStart();
 }
 
@@ -765,6 +967,8 @@ function bindEvents() {
     });
 
     newGameBtnEl.addEventListener('click', () => maybeGeneratePuzzle(false));
+    undoMoveBtnEl.addEventListener('click', undoMove);
+    checkPuzzleBtnEl.addEventListener('click', checkPuzzleNow);
     clearBoardBtnEl.addEventListener('click', clearEntries);
     notesToggleEl.addEventListener('click', toggleNotesMode);
 
@@ -793,4 +997,6 @@ buildBoard();
 bindEvents();
 setDifficultyUI();
 setButtonsEnabled(false);
-renderBoard();
+if (!restoreActiveState()) {
+    renderBoard();
+}

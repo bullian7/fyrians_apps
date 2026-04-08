@@ -1,0 +1,251 @@
+.basicnotes-layout {
+    width: min(1080px, 100%);
+    --panel-bg: linear-gradient(150deg, color-mix(in srgb, var(--surface2) 82%, #000 18%), color-mix(in srgb, var(--surface) 92%, #000 8%));
+    --panel-border: color-mix(in srgb, var(--primary) 22%, var(--border-subtle) 78%);
+    --soft-shadow: 0 14px 34px rgba(0, 0, 0, 0.3);
+}
+
+.basicnotes-shell {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 0.8rem;
+}
+
+.notes-sidebar,
+.editor-panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 14px;
+    box-shadow: var(--soft-shadow);
+    padding: 0.9rem;
+}
+
+.notes-sidebar h2,
+.editor-panel h2 {
+    margin-bottom: 0.6rem;
+}
+
+.create-note {
+    display: grid;
+    gap: 0.45rem;
+    margin-bottom: 0.75rem;
+}
+
+.notes-list {
+    display: grid;
+    gap: 0.42rem;
+}
+
+.note-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.56rem 0.6rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--surface2) 84%, #000 16%);
+    cursor: pointer;
+}
+
+.note-item.active {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary-dim) 35%, transparent 65%);
+}
+
+.note-main {
+    min-width: 0;
+}
+
+.note-name {
+    color: var(--text-active);
+    font-size: 0.87rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.note-meta {
+    margin-top: 0.12rem;
+    color: var(--text-dim);
+    font-size: 0.74rem;
+}
+
+.note-pill {
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    color: var(--text-dim);
+    font-size: 0.68rem;
+    padding: 0.22rem 0.46rem;
+}
+
+.editor-panel {
+    position: relative;
+}
+
+.editor-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.editor-top-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.editor-actions {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.editor-lock-pill {
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    color: var(--text-dim);
+    font-size: 0.68rem;
+    padding: 0.2rem 0.44rem;
+}
+
+.editor-fields {
+    margin-top: 0.7rem;
+    display: grid;
+    gap: 0.45rem;
+}
+
+.editor-bottom {
+    margin-top: 0.65rem;
+}
+
+.note-status {
+    margin-top: 0.62rem;
+    color: var(--text-dim);
+    font-size: 0.82rem;
+}
+
+input,
+textarea,
+.tool-btn {
+    border: 1px solid var(--border-subtle);
+    background: color-mix(in srgb, var(--surface2) 86%, #000 14%);
+    color: var(--text-active);
+    border-radius: 8px;
+    padding: 0.52rem 0.65rem;
+    font-size: 0.85rem;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.tool-btn {
+    cursor: pointer;
+}
+
+.tool-btn.danger {
+    border-color: rgba(202, 71, 84, 0.45);
+    color: var(--error);
+}
+
+.password-wrap {
+    position: relative;
+}
+
+.password-wrap input {
+    width: 100%;
+    padding-right: 2.35rem;
+}
+
+.pass-toggle {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 1px solid var(--border-subtle);
+    background: color-mix(in srgb, var(--surface2) 86%, #000 14%);
+    color: var(--text-dim);
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.pass-toggle::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 5c5.5 0 9.8 5.1 10 5.3a1 1 0 0 1 0 1.4C21.8 11.9 17.5 17 12 17S2.2 11.9 2 11.7a1 1 0 0 1 0-1.4C2.2 10.1 6.5 5 12 5Zm0 2c-3.6 0-6.8 2.8-8 4 1.2 1.2 4.4 4 8 4s6.8-2.8 8-4c-1.2-1.2-4.4-4-8-4Zm0 1.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 5c5.5 0 9.8 5.1 10 5.3a1 1 0 0 1 0 1.4C21.8 11.9 17.5 17 12 17S2.2 11.9 2 11.7a1 1 0 0 1 0-1.4C2.2 10.1 6.5 5 12 5Zm0 2c-3.6 0-6.8 2.8-8 4 1.2 1.2 4.4 4 8 4s6.8-2.8 8-4c-1.2-1.2-4.4-4-8-4Zm0 1.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    background: currentColor;
+}
+
+.pass-toggle.is-on {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.note-lock-overlay {
+    position: absolute;
+    inset: 0.9rem;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--surface2) 45%, transparent 55%);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 6;
+}
+
+.note-lock-card {
+    width: min(420px, calc(100% - 1.2rem));
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--surface2) 90%, #000 10%);
+    box-shadow: var(--soft-shadow);
+    padding: 0.8rem;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.note-lock-card h3 {
+    color: var(--text-active);
+    font-size: 1rem;
+}
+
+.note-lock-card p {
+    color: var(--text-dim);
+    font-size: 0.82rem;
+}
+
+.empty-note {
+    border: 1px dashed var(--border-subtle);
+    border-radius: 10px;
+    color: var(--text-dim);
+    padding: 0.65rem;
+    font-size: 0.84rem;
+}
+
+@media (max-width: 980px) {
+    .basicnotes-shell {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .editor-actions {
+        width: 100%;
+    }
+
+    .editor-actions .tool-btn {
+        flex: 1;
+    }
+}

@@ -78,5 +78,35 @@ APPLETS = [
         'standalone': '/listmaker',
         'embed': '/listmaker?embed=1',
         'sigil': '[LM]'
+    },
+    {
+        'key': 'basicnotes',
+        'name': 'Basic Notes',
+        'title': 'Basic Notes',
+        'category': 'productivity',
+        'description': 'Simple note-taking with optional password lock per note.',
+        'standalone': '/basic-notes',
+        'embed': '/basic-notes?embed=1',
+        'sigil': '[BN]'
+    },
+    {
+        'key': 'workoutplanner',
+        'name': 'Workout Schedule Planner',
+        'title': 'Workout Schedule Planner',
+        'category': 'productivity',
+        'description': 'Plan workout bullet points by day across as many weeks as you want.',
+        'standalone': '/workout-planner',
+        'embed': '/workout-planner?embed=1',
+        'sigil': '[WP]'
+    },
+    {
+        'key': 'budgeting',
+        'name': 'Budgeting Planner',
+        'title': 'Budgeting Planner',
+        'category': 'productivity',
+        'description': 'Track income/expenses, set category budgets, filter transactions, and export CSV.',
+        'standalone': '/budgeting',
+        'embed': '/budgeting?embed=1',
+        'sigil': '[BG]'
     }
 ]

@@ -6,11 +6,100 @@ const bestMsEl = document.getElementById('reaction-best-ms');
 const statsToggle = document.getElementById('reaction-stats-toggle');
 const statsPanel = document.getElementById('reaction-stats-panel');
 const statsContent = document.getElementById('reaction-stats-content');
+const successSoundSelect = document.getElementById('success-sound-select');
+const failSoundSelect = document.getElementById('fail-sound-select');
+
+const REACTION_SOUND_SETTINGS_KEY = 'fyrians_reaction_sound_settings_v1';
+const GLOBAL_AUDIO_VOLUME_KEY = 'fyrians_global_audio_volume_v1';
+const SOUND_FILES = {
+    bubbles: '/static/sounds/bubbles.mp3',
+    drop: '/static/sounds/drop.mp3',
+    yuh: '/static/sounds/yuh.mp3',
+    yuh2: '/static/sounds/yuh2.mp3',
+    dissapointment: '/static/sounds/dissapointment.mp3',
+    failure: '/static/sounds/failure.mp3'
+};
+const REACTION_FAIL_MS_THRESHOLD = 250;
+const PRE_GREEN_SOUND_LEAD_MS = 25;
+const SUCCESS_SOUND_POOL = ['bubbles', 'drop', 'yuh', 'yuh2'];
+const FAIL_SOUND_POOL = ['dissapointment', 'failure'];
+const soundCache = {};
 
 let state = 'idle';
 let readyAt = 0;
 let flipTimer = null;
+let preFlipSoundTimer = null;
 let sessionBestMs = null;
+
+function loadSoundSettings() {
+    try {
+        const raw = localStorage.getItem(REACTION_SOUND_SETTINGS_KEY);
+        if (!raw) return { success: 'bubbles', fail: 'none' };
+        const parsed = JSON.parse(raw);
+        const success = ['bubbles', 'drop', 'yuh', 'yuh2', 'random', 'none'].includes(parsed.success) ? parsed.success : 'bubbles';
+        const fail = ['none', 'random', 'dissapointment', 'failure'].includes(parsed.fail) ? parsed.fail : 'none';
+        return { success, fail };
+    } catch {
+        return { success: 'bubbles', fail: 'none' };
+    }
+}
+
+function saveSoundSettings() {
+    localStorage.setItem(REACTION_SOUND_SETTINGS_KEY, JSON.stringify({
+        success: successSoundSelect.value,
+        fail: failSoundSelect.value
+    }));
+}
+
+function globalVolumeValue() {
+    try {
+        const raw = localStorage.getItem(GLOBAL_AUDIO_VOLUME_KEY);
+        const v = Math.max(0, Math.min(100, Number(raw)));
+        return (Number.isFinite(v) ? v : 70) / 100;
+    } catch {
+        return 0.7;
+    }
+}
+
+function pickRandomFrom(pool) {
+    if (!Array.isArray(pool) || !pool.length) return 'none';
+    const idx = Math.floor(Math.random() * pool.length);
+    return pool[idx];
+}
+
+function resolveSoundChoice(kind) {
+    if (kind === 'success') {
+        const value = successSoundSelect.value;
+        if (value === 'random') return pickRandomFrom(SUCCESS_SOUND_POOL);
+        return value;
+    }
+    const value = failSoundSelect.value;
+    if (value === 'random') return pickRandomFrom(FAIL_SOUND_POOL);
+    return value;
+}
+
+function getAudio(name) {
+    if (!SOUND_FILES[name]) return null;
+    if (!soundCache[name]) {
+        soundCache[name] = new Audio(SOUND_FILES[name]);
+        soundCache[name].preload = 'auto';
+    }
+    return soundCache[name];
+}
+
+function playSound(name) {
+    if (!name || name === 'none') return;
+    const audio = getAudio(name);
+    if (!audio) return;
+    try {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.volume = globalVolumeValue();
+        void audio.play();
+    } catch (_err) {
+        // ignore autoplay / unavailable audio issues
+    }
+}
 
 function setZoneColor(className) {
     zoneBtn.classList.remove('blue-state', 'green-state', 'red-state');
@@ -20,6 +109,10 @@ function setZoneColor(className) {
 function setIdle() {
     state = 'idle';
     readyAt = 0;
+    if (preFlipSoundTimer) {
+        clearTimeout(preFlipSoundTimer);
+        preFlipSoundTimer = null;
+    }
     if (flipTimer) {
         clearTimeout(flipTimer);
         flipTimer = null;
@@ -36,6 +129,12 @@ function setWaiting() {
     subText.textContent = 'Do not click yet. Wait for green.';
 
     const delayMs = 2000 + Math.floor(Math.random() * 2001);
+    const chosenReadySound = resolveSoundChoice('success');
+    if (chosenReadySound !== 'none') {
+        preFlipSoundTimer = setTimeout(() => {
+            playSound(chosenReadySound);
+        }, Math.max(0, delayMs - PRE_GREEN_SOUND_LEAD_MS));
+    }
     flipTimer = setTimeout(() => {
         state = 'ready';
         readyAt = performance.now();
@@ -64,10 +163,15 @@ function setFalseStart() {
         clearTimeout(flipTimer);
         flipTimer = null;
     }
+    if (preFlipSoundTimer) {
+        clearTimeout(preFlipSoundTimer);
+        preFlipSoundTimer = null;
+    }
     setZoneColor('red-state');
     mainText.textContent = 'Too Soon';
     subText.textContent = 'Wait for green next time. Click the panel to retry.';
     lastMsEl.textContent = 'False start';
+    playSound(resolveSoundChoice('fail'));
 }
 
 function fmt(value, digits = 1) {
@@ -152,6 +256,9 @@ function handleAction(method) {
     if (state === 'ready') {
         const reactionMs = Math.max(1, Math.round(performance.now() - readyAt));
         setResult(reactionMs);
+        if (reactionMs > REACTION_FAIL_MS_THRESHOLD) {
+            playSound(resolveSoundChoice('fail'));
+        }
         void recordReactionAttempt({
             reaction_ms: reactionMs,
             false_start: false,
@@ -179,5 +286,12 @@ statsToggle.addEventListener('click', async () => {
         await loadReactionStats();
     }
 });
+
+successSoundSelect.addEventListener('change', saveSoundSettings);
+failSoundSelect.addEventListener('change', saveSoundSettings);
+
+const settings = loadSoundSettings();
+successSoundSelect.value = settings.success;
+failSoundSelect.value = settings.fail;
 
 setIdle();

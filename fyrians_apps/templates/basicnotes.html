@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/basicnotes.css') }}">
+{% endblock %}
+
+{% block nav_back %}
+<a href="/" class="back-link">← Back to Apps</a>
+{% endblock %}
+
+{% block content %}
+<div class="container basicnotes-layout">
+    <header class="app-header">
+        <h1>Basic Notes</h1>
+        <p class="subtitle">Write notes fast. Lock individual notes with a password if you want.</p>
+    </header>
+
+    <section class="basicnotes-shell">
+        <aside class="notes-sidebar">
+            <h2>Create Note</h2>
+            <div class="create-note">
+                <input id="new-note-title" type="text" placeholder="Note title">
+                <div class="password-wrap">
+                    <input id="new-note-password" type="password" placeholder="Optional password lock">
+                    <button id="new-note-password-toggle" class="pass-toggle" type="button" aria-label="Show password" title="Show password"></button>
+                </div>
+                <button id="create-note-btn" class="primary-btn" type="button">Create Note</button>
+            </div>
+            <div id="notes-list" class="notes-list"></div>
+        </aside>
+
+        <section class="editor-panel">
+            <div id="note-lock-overlay" class="note-lock-overlay hidden">
+                <div class="note-lock-card">
+                    <h3>Note Locked</h3>
+                    <p>Enter the password to open this note.</p>
+                    <div class="password-wrap">
+                        <input id="unlock-note-password" type="password" placeholder="Note password">
+                        <button id="unlock-note-password-toggle" class="pass-toggle" type="button" aria-label="Show password" title="Show password"></button>
+                    </div>
+                    <button id="unlock-note-btn" class="primary-btn" type="button">Enter Password</button>
+                </div>
+            </div>
+
+            <div class="editor-top">
+                <div class="editor-top-left">
+                    <h2 id="editor-title">Choose a note</h2>
+                    <div id="editor-lock-pill" class="editor-lock-pill hidden">Locked</div>
+                </div>
+                <div class="editor-actions">
+                    <button id="lock-note-btn" class="tool-btn hidden" type="button">Lock Note</button>
+                    <button id="delete-note-btn" class="tool-btn danger hidden" type="button">Delete Note</button>
+                </div>
+            </div>
+
+            <div class="editor-fields">
+                <input id="edit-note-title" type="text" placeholder="Note title">
+                <textarea id="edit-note-body" rows="14" placeholder="Select or unlock a note to edit"></textarea>
+            </div>
+
+            <div class="editor-bottom">
+                <button id="save-note-btn" class="primary-btn" type="button">Save Note</button>
+            </div>
+
+            <div id="note-status" class="note-status">Sign in through Account to save notes.</div>
+        </section>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/basicnotes.js') }}"></script>
+{% endblock %}

@@ -15,22 +15,6 @@
         <p class="subtitle">generator with pencil marks</p>
     </header>
 
-    <div class="sudoku-toolbar">
-        <div class="toolbar-left">
-            <div class="difficulty-group" role="group" aria-label="Difficulty">
-                <button class="diff-btn active" data-difficulty="easy">Easy</button>
-                <button class="diff-btn" data-difficulty="medium">Medium</button>
-                <button class="diff-btn" data-difficulty="hard">Hard</button>
-            </div>
-            <button id="new-game-btn" class="primary-btn">Generate Puzzle</button>
-        </div>
-        <div class="toolbar-right">
-            <button id="notes-toggle" class="tool-btn" aria-pressed="false">Notes: Off</button>
-            <button id="clear-board-btn" class="tool-btn">Clear Entries</button>
-            <button id="sudoku-stats-toggle" class="tool-btn" type="button">My Stats</button>
-        </div>
-    </div>
-
     <div id="sudoku-stats-panel" class="sudoku-stats-panel hidden">
         <div id="sudoku-stats-content" class="sudoku-stats-content"></div>
     </div>
@@ -41,26 +25,49 @@
         </div>
 
         <div class="sudoku-side">
-            <div class="side-card keypad-card">
-                <div class="keypad" aria-label="Number keypad">
-                    <button class="key-btn" data-value="1">1</button>
-                    <button class="key-btn" data-value="2">2</button>
-                    <button class="key-btn" data-value="3">3</button>
-                    <button class="key-btn" data-value="4">4</button>
-                    <button class="key-btn" data-value="5">5</button>
-                    <button class="key-btn" data-value="6">6</button>
-                    <button class="key-btn" data-value="7">7</button>
-                    <button class="key-btn" data-value="8">8</button>
-                    <button class="key-btn" data-value="9">9</button>
-                    <button class="key-btn erase" data-value="0">Erase</button>
+            <div class="sudoku-toolbar side-toolbar">
+                <div class="toolbar-left">
+                    <div class="difficulty-group" role="group" aria-label="Difficulty">
+                        <button class="diff-btn active" data-difficulty="easy">Easy</button>
+                        <button class="diff-btn" data-difficulty="medium">Medium</button>
+                        <button class="diff-btn" data-difficulty="hard">Hard</button>
+                    </div>
+                    <button id="new-game-btn" class="primary-btn">Generate Puzzle</button>
                 </div>
             </div>
 
-            <div class="status-box side-card">
-                <div id="status-text">Pick a difficulty and click Generate Puzzle.</div>
-                <div id="mistake-text">Conflicts: -</div>
-                <div id="timer-text">Time: 00:00</div>
-                <p class="help-text">Tip: press <strong>N</strong> to toggle notes mode.</p>
+            <div class="side-stack">
+                <div class="side-card actions-card">
+                    <div class="quick-actions">
+                        <button id="notes-toggle" class="tool-btn" aria-pressed="false">Notes: Off</button>
+                        <button id="undo-move-btn" class="tool-btn">Undo</button>
+                        <button id="check-puzzle-btn" class="tool-btn">Check Puzzle</button>
+                        <button id="clear-board-btn" class="tool-btn">Clear Entries</button>
+                        <button id="sudoku-stats-toggle" class="tool-btn" type="button">My Stats</button>
+                    </div>
+                </div>
+
+                <div class="side-card keypad-card">
+                    <div class="keypad" aria-label="Number keypad">
+                        <button class="key-btn" data-value="1">1</button>
+                        <button class="key-btn" data-value="2">2</button>
+                        <button class="key-btn" data-value="3">3</button>
+                        <button class="key-btn" data-value="4">4</button>
+                        <button class="key-btn" data-value="5">5</button>
+                        <button class="key-btn" data-value="6">6</button>
+                        <button class="key-btn" data-value="7">7</button>
+                        <button class="key-btn" data-value="8">8</button>
+                        <button class="key-btn" data-value="9">9</button>
+                        <button class="key-btn erase" data-value="0">Erase</button>
+                    </div>
+                </div>
+
+                <div class="status-box side-card">
+                    <div id="status-text">Pick a difficulty and click Generate Puzzle.</div>
+                    <div id="mistake-text">Conflicts: -</div>
+                    <div id="timer-text">Time: 00:00</div>
+                    <p class="help-text">Tip: press <strong>N</strong> to toggle notes mode.</p>
+                </div>
             </div>
         </div>
 

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/workoutplanner.css') }}">
+{% endblock %}
+
+{% block nav_back %}
+<a href="/" class="back-link">← Back to Apps</a>
+{% endblock %}
+
+{% block content %}
+<div class="container workout-layout">
+    <header class="app-header">
+        <h1>Workout Schedule Planner</h1>
+        <p class="subtitle">Week-based planner. Not tied to calendar dates.</p>
+    </header>
+
+    <section class="workout-shell">
+        <div class="workout-top">
+            <button id="add-week-btn" class="primary-btn" type="button">Add Week</button>
+            <button id="reset-plan-btn" class="tool-btn danger" type="button">Reset Plan</button>
+        </div>
+
+        <div id="planner-status" class="planner-status">Tip: use one bullet per line in each day cell.</div>
+
+        <div class="planner-wrap">
+            <table class="planner-table">
+                <thead>
+                    <tr>
+                        <th class="week-col">Week</th>
+                        <th>Mon</th>
+                        <th>Tue</th>
+                        <th>Wed</th>
+                        <th>Thu</th>
+                        <th>Fri</th>
+                        <th>Sat</th>
+                        <th>Sun</th>
+                        <th class="action-col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="planner-body"></tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/workoutplanner.js') }}"></script>
+{% endblock %}

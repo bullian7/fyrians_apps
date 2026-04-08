@@ -3,18 +3,29 @@
 }
 
 .main-content.embedded {
-    padding: 8px 10px;
+    padding: 6px 10px;
+}
+
+.main-content.embedded .sudoku-header {
+    display: none;
+}
+
+.main-content.embedded .sudoku-layout {
+    --board-max-size: 900px;
+    --board-vh-offset: 145px;
 }
 
 .sudoku-layout {
-    width: min(920px, 100%);
+    width: min(1180px, 100%);
+    --board-max-size: 700px;
+    --board-vh-offset: 260px;
     --panel-bg: linear-gradient(145deg, color-mix(in srgb, var(--surface2) 82%, #000 18%), color-mix(in srgb, var(--surface) 90%, #000 10%));
     --panel-border: color-mix(in srgb, var(--primary) 22%, var(--border-subtle) 78%);
     --soft-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
 }
 
 .sudoku-header {
-    margin-bottom: 1rem;
+    margin-bottom: 0.7rem;
 }
 
 .sudoku-header h1 {
@@ -32,8 +43,8 @@
     justify-content: space-between;
     gap: 0.75rem;
     align-items: center;
-    margin-bottom: 0.9rem;
-    padding: 0.65rem;
+    margin-bottom: 0.55rem;
+    padding: 0.5rem;
     border: 1px solid var(--panel-border);
     border-radius: 12px;
     background: var(--panel-bg);
@@ -100,21 +111,27 @@
 .sudoku-main {
     position: relative;
     display: grid;
-    grid-template-columns: auto 240px;
-    gap: 0.95rem;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.72fr);
+    gap: 0.6rem;
     align-items: stretch;
 }
 
 .board-shell {
-    padding: 0.75rem;
+    padding: 0.5rem;
     border: 1px solid var(--panel-border);
     border-radius: 14px;
     background: var(--panel-bg);
     box-shadow: var(--soft-shadow);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .sudoku-board {
-    width: min(540px, 100%);
+    height: min(100%, calc(100dvh - var(--board-vh-offset)), var(--board-max-size));
+    width: auto;
+    max-width: 100%;
+    max-height: 100%;
     aspect-ratio: 1 / 1;
     display: grid;
     grid-template-columns: repeat(9, 1fr);
@@ -208,12 +225,42 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 0.4rem;
+    width: 100%;
 }
 
 .sudoku-side {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    height: 100%;
+    min-height: 0;
+}
+
+.side-toolbar {
+    margin-bottom: 0;
+}
+
+.side-toolbar .toolbar-left {
+    width: 100%;
+    flex-wrap: nowrap;
+}
+
+.side-toolbar .difficulty-group {
+    flex: 0 0 auto;
+    min-width: max-content;
+}
+
+.side-toolbar #new-game-btn {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.side-stack {
+    flex: 1;
+    min-height: 0;
     display: grid;
-    gap: 0.65rem;
-    align-content: start;
+    gap: 0.5rem;
+    grid-template-rows: minmax(114px, 0.74fr) minmax(168px, 1.05fr) minmax(92px, 0.5fr);
 }
 
 .side-card {
@@ -221,10 +268,29 @@
     border-radius: 12px;
     background: var(--panel-bg);
     box-shadow: var(--soft-shadow);
+    min-height: 0;
+}
+
+.actions-card {
+    padding: 0.4rem;
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.32rem;
+    height: 100%;
+}
+
+.quick-actions .tool-btn {
+    width: 100%;
+    min-height: 32px;
 }
 
 .keypad-card {
-    padding: 0.58rem;
+    padding: 0.48rem;
+    display: flex;
+    align-items: center;
 }
 
 .key-btn {
@@ -232,7 +298,8 @@
     background: color-mix(in srgb, var(--surface2) 86%, #000 14%);
     color: var(--text-active);
     border-radius: 8px;
-    padding: 0.55rem 0;
+    padding: 0.42rem 0;
+    min-height: 40px;
     font-size: 0.9rem;
     cursor: pointer;
     transition: border-color 0.2s ease, transform 0.2s ease, filter 0.2s ease;
@@ -256,26 +323,29 @@
 
 .status-box {
     margin-top: 0;
-    padding: 0.6rem;
+    padding: 0.42rem 0.54rem;
     color: var(--text-dim);
-    line-height: 1.4;
-    font-size: 0.82rem;
+    line-height: 1.28;
+    font-size: 0.74rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 #status-text {
     color: var(--text-active);
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.12rem;
 }
 
 #timer-text {
     color: var(--primary);
     font-weight: 700;
-    margin-top: 0.2rem;
+    margin-top: 0.12rem;
 }
 
 .help-text {
-    margin-top: 0.3rem;
-    font-size: 0.76rem;
+    margin-top: 0.14rem;
+    font-size: 0.68rem;
 }
 
 .sudoku-complete {
@@ -348,6 +418,11 @@
 }
 
 @media (max-height: 860px) {
+    .sudoku-layout {
+        --board-max-size: 640px;
+        --board-vh-offset: 240px;
+    }
+
     .sudoku-header {
         margin-bottom: 0.55rem;
     }
@@ -376,8 +451,6 @@
 
     .sudoku-main { gap: 0.55rem; }
 
-    .sudoku-board { width: min(438px, 100%); }
-
     .cell {
         font-size: clamp(0.8rem, 1.2vw, 1.12rem);
     }
@@ -388,7 +461,6 @@
     }
 
     .status-box {
-        margin-top: 0.45rem;
         padding: 0.5rem;
         font-size: 0.76rem;
     }
@@ -411,6 +483,15 @@
 
     .sudoku-main {
         grid-template-columns: 1fr;
+    }
+
+    .sudoku-side {
+        height: auto;
+    }
+
+    .side-stack {
+        flex: 0 0 auto;
+        grid-template-rows: auto auto auto;
     }
 
     .sudoku-board {
@@ -448,6 +529,14 @@
     .tool-btn,
     .primary-btn {
         width: 100%;
+    }
+
+    .side-toolbar #new-game-btn {
+        flex: 0 0 auto;
+    }
+
+    .quick-actions {
+        grid-template-columns: 1fr;
     }
 
     .diff-btn {
