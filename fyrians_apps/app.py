@@ -17,6 +17,7 @@ from blueprints.quotebook import quotebook_bp
 from blueprints.basicnotes import basicnotes_bp
 from blueprints.workoutplanner import workoutplanner_bp
 from blueprints.budgeting import budgeting_bp
+from blueprints.flashcards import flashcards_bp
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-secret-change-in-prod')
@@ -36,6 +37,7 @@ app.register_blueprint(quotebook_bp)
 app.register_blueprint(basicnotes_bp)
 app.register_blueprint(workoutplanner_bp)
 app.register_blueprint(budgeting_bp)
+app.register_blueprint(flashcards_bp)
 
 
 @app.context_processor

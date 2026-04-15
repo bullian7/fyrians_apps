@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/flashcards.css') }}">
+{% endblock %}
+
+{% block nav_back %}
+<a href="/" class="back-link">← Back to Apps</a>
+{% endblock %}
+
+{% block content %}
+<div
+    class="container flashcards-layout"
+    id="flashcards-app"
+    data-page="{{ page }}"
+    data-deck-id="{{ deck_id or '' }}"
+    data-home-url="{{ url_for('flashcards_bp.flashcards') }}"
+    data-deck-url-template="{{ url_for('flashcards_bp.flashcards_deck', deck_id='__DECK_ID__') }}"
+>
+    <header class="app-header">
+        <h1>Flashcards</h1>
+        <p class="subtitle">build decks, flip cards, and add new prompts in one deck view</p>
+    </header>
+
+    {% if page == 'decks' %}
+    <section class="flashcards-shell decks-page">
+        <div class="deck-controls">
+            <input id="new-deck-name" type="text" placeholder="New deck name">
+            <button id="create-deck-btn" class="primary-btn" type="button">Create Deck</button>
+        </div>
+        <div id="flashcards-status" class="flashcards-status">Create a deck to get started.</div>
+        <ul id="decks-list" class="decks-list"></ul>
+    </section>
+    {% elif page == 'deck' %}
+    <section class="flashcards-shell deck-page">
+        <div class="deck-switcher">
+            <label for="deck-select">Deck</label>
+            <select id="deck-select"></select>
+            <button id="delete-deck-btn" class="tool-btn danger" type="button">Delete Deck</button>
+        </div>
+        <h2 id="deck-title" class="deck-title">Deck</h2>
+        <div id="flashcards-status" class="flashcards-status"></div>
+
+        <div class="study-actions top">
+            <button id="shuffle-btn" class="tool-btn" type="button">Shuffle</button>
+        </div>
+
+        <div class="study-area">
+            <button id="prev-card-btn" class="card-arrow" type="button" aria-label="Previous card">←</button>
+            <div id="study-card" class="study-card empty" role="button" tabindex="0" aria-live="polite" aria-label="Flashcard. Click to flip.">
+                <div id="study-card-side" class="study-card-side">No cards in this deck yet.</div>
+                <div id="study-card-meta" class="study-card-meta">Front</div>
+            </div>
+            <button id="next-card-btn" class="card-arrow" type="button" aria-label="Next card">→</button>
+        </div>
+
+        <div class="study-actions">
+            <span id="card-counter" class="card-counter">0 / 0</span>
+        </div>
+
+        <div class="add-card-wrap">
+            <button id="add-new-card-btn" class="primary-btn" type="button">Add New Card</button>
+            <div id="new-card-editor" class="new-card-editor hidden">
+                <div class="new-card-editor-head">Front</div>
+                <textarea id="new-card-front" rows="3" placeholder="Type the front of the card"></textarea>
+                <div class="new-card-editor-head">Back</div>
+                <textarea id="new-card-back" rows="3" placeholder="Type the back of the card"></textarea>
+                <div class="new-card-actions">
+                    <button id="save-new-card-btn" class="primary-btn" type="button">Save Card</button>
+                    <button id="cancel-new-card-btn" class="tool-btn" type="button">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-actions">
+            <a class="tool-btn nav-btn" href="{{ url_for('flashcards_bp.flashcards') }}">All Decks</a>
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/flashcards.js') }}"></script>
+{% endblock %}

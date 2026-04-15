@@ -90,6 +90,16 @@ APPLETS = [
         'sigil': '[BN]'
     },
     {
+        'key': 'flashcards',
+        'name': 'Flashcards',
+        'title': 'Flashcards',
+        'category': 'productivity',
+        'description': 'Build custom decks, flip cards, and page through prompts while studying.',
+        'standalone': '/flashcards',
+        'embed': '/flashcards?embed=1',
+        'sigil': '[FC]'
+    },
+    {
         'key': 'workoutplanner',
         'name': 'Workout Schedule Planner',
         'title': 'Workout Schedule Planner',
