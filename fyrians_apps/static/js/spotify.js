@@ -186,39 +186,31 @@ function renderRecent(items) {
 function setupAccountDataUpload() {
     const input = document.getElementById('account-data-input');
     const clearBtn = document.getElementById('account-data-clear');
-    if (!input || !clearBtn) return;
+    const uploadList = document.getElementById('account-upload-list');
+    if (!input || !clearBtn || !uploadList) return;
+
+    loadSavedAccountData();
 
     input.addEventListener('change', async () => {
         const files = Array.from(input.files || []);
         if (!files.length) return;
 
-        setAccountStatus('Parsing account data...');
+        setAccountStatus('Uploading account data...');
         try {
-            const entries = [];
-            for (const file of files) {
-                const text = await file.text();
-                let parsed;
-                try {
-                    parsed = JSON.parse(text);
-                } catch {
-                    throw new Error(`"${file.name}" is not valid JSON.`);
-                }
-                entries.push(...normalizeHistoryEntries(parsed));
+            const formData = new FormData();
+            files.forEach((file) => formData.append('files', file));
+            const res = await fetch('/api/spotify/account-data/uploads', {
+                method: 'POST',
+                body: formData
+            });
+            const payload = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(payload.error || 'Failed to upload account data.');
             }
 
-            if (!entries.length) {
-                throw new Error('No streaming history rows found. Upload a Streaming_History_Audio JSON file.');
-            }
-
-            const stats = buildPastYearStats(entries);
-            renderAccountDataStats(stats);
-            clearBtn.classList.remove('hidden');
-            setAccountStatus(
-                `Loaded ${files.length} file${files.length === 1 ? '' : 's'} · ` +
-                `${formatNum(stats.totalStreams)} plays in the past 12 months.`
-            );
+            applyAccountDataPayload(payload);
+            setAccountStatus(payload.message || 'Upload complete.');
         } catch (err) {
-            resetAccountDataUI();
             setAccountStatus(err.message || 'Failed to read account data.');
             if (window.FyrianPopup) {
                 await window.FyrianPopup.alert(err.message || 'Failed to read account data.', { title: 'Spotify Account Data' });
@@ -228,144 +220,126 @@ function setupAccountDataUpload() {
         }
     });
 
-    clearBtn.addEventListener('click', () => {
-        resetAccountDataUI();
-        clearBtn.classList.add('hidden');
+    clearBtn.addEventListener('click', async () => {
+        const confirmed = window.FyrianPopup
+            ? await window.FyrianPopup.confirm('Delete all uploaded history files from your account?', {
+                title: 'Delete Uploads',
+                danger: true,
+                okText: 'Delete'
+            })
+            : window.confirm('Delete all uploaded history files from your account?');
+        if (!confirmed) return;
+
+        try {
+            const res = await fetch('/api/spotify/account-data/uploads', { method: 'DELETE' });
+            const payload = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(payload.error || 'Failed to delete uploads.');
+            }
+            applyAccountDataPayload(payload);
+            setAccountStatus(payload.message || 'Deleted all uploads.');
+        } catch (err) {
+            setAccountStatus(err.message || 'Failed to delete uploads.');
+        }
     });
 }
 
-function normalizeHistoryEntries(payload) {
-    const rows = Array.isArray(payload) ? payload : (Array.isArray(payload?.items) ? payload.items : []);
-    return rows
-        .map((row) => {
-            const ts = parseHistoryTimestamp(row);
-            if (!Number.isFinite(ts)) return null;
-
-            const trackName = String(
-                row?.master_metadata_track_name ??
-                row?.trackName ??
-                row?.track_name ??
-                row?.spotify_track_name ??
-                ''
-            ).trim();
-
-            const artistName = String(
-                row?.master_metadata_album_artist_name ??
-                row?.artistName ??
-                row?.artist_name ??
-                row?.spotify_artist_name ??
-                ''
-            ).trim();
-
-            if (!trackName && !artistName) return null;
-
-            const msRaw = Number(row?.ms_played ?? row?.msPlayed ?? 0);
-            const msPlayed = Number.isFinite(msRaw) && msRaw > 0 ? msRaw : 0;
-
-            return {
-                ts,
-                trackName: trackName || 'Unknown Track',
-                artistName: artistName || 'Unknown Artist',
-                msPlayed
-            };
-        })
-        .filter(Boolean);
+async function loadSavedAccountData() {
+    try {
+        const res = await fetch('/api/spotify/account-data');
+        const payload = await res.json().catch(() => ({}));
+        if (res.status === 401) {
+            resetAccountDataUI('Sign in to save uploaded history to your account.');
+            return;
+        }
+        if (!res.ok) {
+            throw new Error(payload.error || 'Failed to load saved account data.');
+        }
+        applyAccountDataPayload(payload);
+        if ((payload.uploads || []).length) {
+            setAccountStatus(`Loaded ${(payload.uploads || []).length} saved upload(s) from your account.`);
+        }
+    } catch (err) {
+        setAccountStatus(err.message || 'Failed to load saved account data.');
+    }
 }
 
-function parseHistoryTimestamp(row) {
-    const raw = row?.ts ?? row?.played_at ?? row?.endTime ?? row?.end_time ?? row?.timestamp;
-    if (raw == null) return NaN;
+function applyAccountDataPayload(payload) {
+    const uploads = Array.isArray(payload?.uploads) ? payload.uploads : [];
+    const stats = payload?.stats || {};
 
-    if (typeof raw === 'number') {
-        return raw > 1e12 ? raw : raw * 1000;
+    renderAccountUploads(uploads);
+    renderAccountDataStats(stats);
+
+    const clearBtn = document.getElementById('account-data-clear');
+    if (clearBtn) clearBtn.classList.toggle('hidden', uploads.length === 0);
+    if (uploads.length === 0) {
+        setAccountStatus('No account data uploaded yet.');
     }
-
-    const text = String(raw).trim();
-    if (!text) return NaN;
-
-    if (/^\d+$/.test(text)) {
-        const numeric = Number(text);
-        return numeric > 1e12 ? numeric : numeric * 1000;
-    }
-
-    let normalized = text;
-    if (normalized.includes(' ') && !normalized.includes('T')) {
-        normalized = normalized.replace(' ', 'T');
-    }
-    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(normalized)) {
-        normalized += ':00';
-    }
-
-    const parsed = Date.parse(normalized);
-    return Number.isFinite(parsed) ? parsed : NaN;
 }
 
-function buildPastYearStats(entries) {
-    const now = Date.now();
-    const cutoff = now - (365 * 24 * 60 * 60 * 1000);
-    const yearRows = entries.filter((row) => row.ts >= cutoff && row.ts <= (now + 60000));
+function renderAccountUploads(uploads) {
+    const list = document.getElementById('account-upload-list');
+    if (!list) return;
 
-    const trackMap = new Map();
-    const artistMap = new Map();
-    const daySet = new Set();
-
-    let totalMs = 0;
-    for (const row of yearRows) {
-        totalMs += row.msPlayed;
-
-        const dayKey = new Date(row.ts).toISOString().slice(0, 10);
-        daySet.add(dayKey);
-
-        const trackKey = `${row.trackName}|||${row.artistName}`;
-        const t = trackMap.get(trackKey) || {
-            trackName: row.trackName,
-            artistName: row.artistName,
-            plays: 0,
-            msPlayed: 0
-        };
-        t.plays += 1;
-        t.msPlayed += row.msPlayed;
-        trackMap.set(trackKey, t);
-
-        const a = artistMap.get(row.artistName) || { artistName: row.artistName, plays: 0, msPlayed: 0 };
-        a.plays += 1;
-        a.msPlayed += row.msPlayed;
-        artistMap.set(row.artistName, a);
+    if (!uploads.length) {
+        list.classList.add('hidden');
+        list.innerHTML = '';
+        return;
     }
 
-    const topTracks = Array.from(trackMap.values()).sort((a, b) => (
-        b.plays - a.plays || b.msPlayed - a.msPlayed || a.trackName.localeCompare(b.trackName)
-    ));
-    const topArtists = Array.from(artistMap.values()).sort((a, b) => (
-        b.plays - a.plays || b.msPlayed - a.msPlayed || a.artistName.localeCompare(b.artistName)
-    ));
+    list.classList.remove('hidden');
+    list.innerHTML = uploads.map((upload) => `
+        <li class="account-upload-item">
+            <div class="account-upload-meta">
+                <span class="account-upload-name">${escHtml(upload.filename || 'upload.json')}</span>
+                <span class="account-upload-count">${formatNum(upload.row_count || 0)} rows</span>
+            </div>
+            <button class="account-upload-delete" type="button" data-upload-id="${upload.id}">Delete</button>
+        </li>
+    `).join('');
 
-    return {
-        totalStreams: yearRows.length,
-        totalMs,
-        totalMinutes: Math.round(totalMs / 60000),
-        uniqueTracks: trackMap.size,
-        uniqueArtists: artistMap.size,
-        activeDays: daySet.size,
-        topTrack: topTracks[0] || null,
-        topArtist: topArtists[0] || null,
-        topTracks: topTracks.slice(0, 12)
-    };
+    list.querySelectorAll('.account-upload-delete').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+            const uploadId = btn.dataset.uploadId;
+            if (!uploadId) return;
+            const confirmed = window.FyrianPopup
+                ? await window.FyrianPopup.confirm('Delete this uploaded history file?', {
+                    title: 'Delete Upload',
+                    danger: true,
+                    okText: 'Delete'
+                })
+                : window.confirm('Delete this uploaded history file?');
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch(`/api/spotify/account-data/uploads/${uploadId}`, { method: 'DELETE' });
+                const payload = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    throw new Error(payload.error || 'Failed to delete upload.');
+                }
+                applyAccountDataPayload(payload);
+                setAccountStatus(payload.message || 'Deleted upload.');
+            } catch (err) {
+                setAccountStatus(err.message || 'Failed to delete upload.');
+            }
+        });
+    });
 }
 
 function renderAccountDataStats(stats) {
-    const hasData = stats.totalStreams > 0;
+    const hasData = Number(stats?.totalStreams || 0) > 0;
     document.getElementById('account-data-results').classList.toggle('hidden', !hasData);
     document.getElementById('account-top-tracks-wrap').classList.toggle('hidden', !hasData);
 
-    document.getElementById('ad-minutes').textContent = hasData ? formatNum(stats.totalMinutes) : '—';
-    document.getElementById('ad-streams').textContent = hasData ? formatNum(stats.totalStreams) : '—';
-    document.getElementById('ad-unique-tracks').textContent = hasData ? formatNum(stats.uniqueTracks) : '—';
-    document.getElementById('ad-unique-artists').textContent = hasData ? formatNum(stats.uniqueArtists) : '—';
-    document.getElementById('ad-top-track').textContent = hasData && stats.topTrack
+    document.getElementById('ad-minutes').textContent = hasData ? formatNum(stats?.totalMinutes) : '—';
+    document.getElementById('ad-streams').textContent = hasData ? formatNum(stats?.totalStreams) : '—';
+    document.getElementById('ad-unique-tracks').textContent = hasData ? formatNum(stats?.uniqueTracks) : '—';
+    document.getElementById('ad-unique-artists').textContent = hasData ? formatNum(stats?.uniqueArtists) : '—';
+    document.getElementById('ad-top-track').textContent = hasData && stats?.topTrack
         ? `${stats.topTrack.trackName} (${formatNum(stats.topTrack.plays)}x)`
         : '—';
-    document.getElementById('ad-top-artist').textContent = hasData && stats.topArtist
+    document.getElementById('ad-top-artist').textContent = hasData && stats?.topArtist
         ? `${stats.topArtist.artistName} (${formatNum(stats.topArtist.plays)}x)`
         : '—';
 
@@ -375,7 +349,7 @@ function renderAccountDataStats(stats) {
         return;
     }
 
-    topList.innerHTML = stats.topTracks.map((item, i) => `
+    topList.innerHTML = (stats?.topTracks || []).map((item, i) => `
         <li class="track-item">
             <span class="track-rank">${i + 1}</span>
             <div class="track-art-placeholder">♪</div>
@@ -388,9 +362,11 @@ function renderAccountDataStats(stats) {
     `).join('');
 }
 
-function resetAccountDataUI() {
+function resetAccountDataUI(statusText = 'No account data uploaded yet.') {
     document.getElementById('account-data-results').classList.add('hidden');
     document.getElementById('account-top-tracks-wrap').classList.add('hidden');
+    document.getElementById('account-upload-list').classList.add('hidden');
+    document.getElementById('account-upload-list').innerHTML = '';
     document.getElementById('account-top-tracks').innerHTML = '';
     document.getElementById('ad-minutes').textContent = '—';
     document.getElementById('ad-streams').textContent = '—';
@@ -398,7 +374,8 @@ function resetAccountDataUI() {
     document.getElementById('ad-top-artist').textContent = '—';
     document.getElementById('ad-unique-tracks').textContent = '—';
     document.getElementById('ad-unique-artists').textContent = '—';
-    setAccountStatus('No account data uploaded yet.');
+    document.getElementById('account-data-clear').classList.add('hidden');
+    setAccountStatus(statusText);
 }
 
 function setAccountStatus(text) {

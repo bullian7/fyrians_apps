@@ -216,6 +216,26 @@
     word-break: break-word;
 }
 
+.study-card-audio {
+    margin-top: 0.55rem;
+    display: grid;
+    gap: 0.35rem;
+    justify-items: center;
+}
+
+.study-card-audio audio {
+    width: min(360px, 100%);
+}
+
+.study-card-audio-player {
+    display: none;
+}
+
+.study-card-audio-btn {
+    padding: 0.44rem 0.72rem;
+    font-size: 0.8rem;
+}
+
 .study-card-meta {
     font-size: 0.76rem;
     color: var(--text-mid);
@@ -245,11 +265,92 @@
     gap: 0.5rem;
 }
 
+.new-card-editor-title {
+    font-size: 0.88rem;
+    color: var(--text-active);
+    font-weight: 700;
+}
+
 .new-card-editor-head {
     font-size: 0.74rem;
     color: var(--text-mid);
     text-transform: uppercase;
     letter-spacing: 0.8px;
+}
+
+.audio-controls {
+    display: flex;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+}
+
+.audio-preview {
+    width: min(360px, 100%);
+}
+
+.audio-control.is-recording {
+    border-color: rgba(202, 71, 84, 0.55);
+    background: rgba(202, 71, 84, 0.15);
+}
+
+.audio-record-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9800;
+    display: grid;
+    place-items: center;
+}
+
+.audio-record-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(4, 8, 14, 0.66);
+    backdrop-filter: blur(2px);
+}
+
+.audio-record-panel {
+    position: relative;
+    width: min(760px, calc(100vw - 1.2rem));
+    border-radius: 16px;
+    border: 1px solid color-mix(in srgb, var(--primary) 36%, var(--border-subtle) 64%);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--surface2) 82%, #000 18%), color-mix(in srgb, var(--surface) 90%, #000 10%));
+    box-shadow: 0 24px 44px rgba(0, 0, 0, 0.44);
+    padding: 0.9rem;
+    display: grid;
+    gap: 0.65rem;
+}
+
+.audio-record-title {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-active);
+}
+
+.audio-record-status {
+    margin: 0;
+    color: var(--text-mid);
+    font-size: 0.84rem;
+}
+
+.audio-record-waveform {
+    width: 100%;
+    height: 132px;
+    border-radius: 12px;
+    border: 1px solid var(--border-subtle);
+    background: radial-gradient(circle at 20% 0%, color-mix(in srgb, var(--primary) 11%, transparent 89%), transparent 42%),
+        linear-gradient(150deg, color-mix(in srgb, var(--surface2) 94%, #000 6%), color-mix(in srgb, var(--surface) 94%, #000 6%));
+}
+
+.audio-record-playback {
+    width: min(460px, 100%);
+    justify-self: center;
+}
+
+.audio-record-actions {
+    display: flex;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .new-card-actions {
@@ -265,12 +366,12 @@
 @media (max-width: 980px) {
     .deck-controls,
     .deck-switcher,
-    .study-area,
     .deck-row {
         grid-template-columns: 1fr;
     }
 
     .study-area {
+        grid-template-columns: auto minmax(0, 1fr) auto;
         gap: 0.55rem;
     }
 
@@ -286,5 +387,14 @@
 
     .add-card-wrap {
         justify-items: stretch;
+    }
+
+    .audio-record-panel {
+        width: calc(100vw - 0.8rem);
+        padding: 0.75rem;
+    }
+
+    .audio-record-waveform {
+        height: 110px;
     }
 }

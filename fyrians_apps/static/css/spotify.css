@@ -513,6 +513,56 @@
     font-size: 0.78rem;
 }
 
+.account-upload-list {
+    list-style: none;
+    margin: 0.55rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0.35rem;
+}
+
+.account-upload-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.55rem;
+    border: 1px solid var(--border-subtle);
+    background: color-mix(in srgb, var(--surface2) 86%, #000 14%);
+    border-radius: 8px;
+    padding: 0.45rem 0.55rem;
+}
+
+.account-upload-meta {
+    display: grid;
+    gap: 0.1rem;
+    min-width: 0;
+}
+
+.account-upload-name {
+    color: var(--text-active);
+    font-size: 0.76rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.account-upload-count {
+    color: var(--text-dim);
+    font-size: 0.7rem;
+}
+
+.account-upload-delete {
+    border: 1px solid color-mix(in srgb, var(--error) 40%, var(--border-subtle) 60%);
+    background: rgba(202, 71, 84, 0.12);
+    color: var(--error);
+    border-radius: 8px;
+    padding: 0.38rem 0.56rem;
+    font-size: 0.72rem;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    flex-shrink: 0;
+}
+
 .account-data-overview {
     margin-top: 0.8rem;
     margin-bottom: 0.5rem;

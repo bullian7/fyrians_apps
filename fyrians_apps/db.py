@@ -136,6 +136,31 @@ def init_db():
             FOREIGN KEY(user_id) REFERENCES users(id)
         );
         CREATE INDEX IF NOT EXISTS idx_basic_notes_user_time ON basic_notes(user_id, updated_at DESC);
+
+        CREATE TABLE IF NOT EXISTS spotify_history_uploads (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            filename TEXT NOT NULL,
+            row_count INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_spotify_uploads_user_time ON spotify_history_uploads(user_id, created_at DESC);
+
+        CREATE TABLE IF NOT EXISTS spotify_history_entries (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            upload_id INTEGER NOT NULL,
+            played_at_ms INTEGER NOT NULL,
+            track_name TEXT NOT NULL,
+            artist_name TEXT NOT NULL,
+            ms_played INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(id),
+            FOREIGN KEY(upload_id) REFERENCES spotify_history_uploads(id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_spotify_entries_user_time ON spotify_history_entries(user_id, played_at_ms DESC);
+        CREATE INDEX IF NOT EXISTS idx_spotify_entries_upload ON spotify_history_entries(upload_id);
         """
     )
     user_columns = {row['name'] for row in db.execute("PRAGMA table_info(users)").fetchall()}

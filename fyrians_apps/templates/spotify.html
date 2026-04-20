@@ -10,6 +10,12 @@
 
 {% block content %}
 <div class="spotify-layout">
+    {% if auth_error %}
+    <div class="error-banner">
+        Spotify auth error: <strong>{{ auth_error }}</strong>.
+        Check redirect URI/client settings in Spotify Dashboard.
+    </div>
+    {% endif %}
 
     {% if not logged_in %}
     <!-- ── Connect Screen ── -->
@@ -94,6 +100,7 @@
                 <button id="account-data-clear" class="account-clear-btn hidden" type="button">Clear Upload</button>
             </div>
             <p id="account-data-status" class="account-upload-status">No account data uploaded yet.</p>
+            <ul id="account-upload-list" class="account-upload-list hidden"></ul>
 
             <div id="account-data-results" class="stats-overview account-data-overview hidden">
                 <div class="overview-chip">

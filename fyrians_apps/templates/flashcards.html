@@ -43,12 +43,15 @@
 
         <div class="study-actions top">
             <button id="shuffle-btn" class="tool-btn" type="button">Shuffle</button>
+            <button id="edit-card-btn" class="tool-btn" type="button">Edit Card</button>
+            <button id="delete-card-btn" class="tool-btn danger" type="button">Delete Card</button>
         </div>
 
         <div class="study-area">
             <button id="prev-card-btn" class="card-arrow" type="button" aria-label="Previous card">←</button>
             <div id="study-card" class="study-card empty" role="button" tabindex="0" aria-live="polite" aria-label="Flashcard. Click to flip.">
                 <div id="study-card-side" class="study-card-side">No cards in this deck yet.</div>
+                <div id="study-card-audio" class="study-card-audio hidden"></div>
                 <div id="study-card-meta" class="study-card-meta">Front</div>
             </div>
             <button id="next-card-btn" class="card-arrow" type="button" aria-label="Next card">→</button>
@@ -61,10 +64,21 @@
         <div class="add-card-wrap">
             <button id="add-new-card-btn" class="primary-btn" type="button">Add New Card</button>
             <div id="new-card-editor" class="new-card-editor hidden">
+                <div id="new-card-editor-title" class="new-card-editor-title">Add New Card</div>
                 <div class="new-card-editor-head">Front</div>
                 <textarea id="new-card-front" rows="3" placeholder="Type the front of the card"></textarea>
+                <div class="audio-controls">
+                    <button id="record-front-audio-btn" class="tool-btn audio-control" type="button">Record Front Audio</button>
+                    <button id="clear-front-audio-btn" class="tool-btn audio-control" type="button">Clear Front Audio</button>
+                </div>
+                <audio id="new-card-front-audio-preview" class="audio-preview hidden" controls></audio>
                 <div class="new-card-editor-head">Back</div>
                 <textarea id="new-card-back" rows="3" placeholder="Type the back of the card"></textarea>
+                <div class="audio-controls">
+                    <button id="record-back-audio-btn" class="tool-btn audio-control" type="button">Record Back Audio</button>
+                    <button id="clear-back-audio-btn" class="tool-btn audio-control" type="button">Clear Back Audio</button>
+                </div>
+                <audio id="new-card-back-audio-preview" class="audio-preview hidden" controls></audio>
                 <div class="new-card-actions">
                     <button id="save-new-card-btn" class="primary-btn" type="button">Save Card</button>
                     <button id="cancel-new-card-btn" class="tool-btn" type="button">Cancel</button>
@@ -74,6 +88,22 @@
 
         <div class="page-actions">
             <a class="tool-btn nav-btn" href="{{ url_for('flashcards_bp.flashcards') }}">All Decks</a>
+        </div>
+
+        <div id="audio-record-modal" class="audio-record-modal hidden" aria-hidden="true">
+            <div class="audio-record-backdrop" data-audio-record-close="1"></div>
+            <div class="audio-record-panel" role="dialog" aria-modal="true" aria-labelledby="audio-record-title">
+                <h3 id="audio-record-title" class="audio-record-title">Record Audio</h3>
+                <p id="audio-record-status" class="audio-record-status">Press start to begin recording.</p>
+                <canvas id="audio-record-waveform" class="audio-record-waveform" width="640" height="180"></canvas>
+                <audio id="audio-record-playback" class="audio-record-playback hidden" controls></audio>
+                <div class="audio-record-actions">
+                    <button id="audio-record-start-btn" class="tool-btn" type="button">Start</button>
+                    <button id="audio-record-stop-btn" class="tool-btn" type="button">Stop</button>
+                    <button id="audio-record-use-btn" class="primary-btn" type="button">Use Recording</button>
+                    <button id="audio-record-cancel-btn" class="tool-btn" type="button">Cancel</button>
+                </div>
+            </div>
         </div>
     </section>
     {% endif %}
